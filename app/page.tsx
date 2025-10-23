@@ -17,6 +17,7 @@ export default function Home() {
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null); // Track which audio is playing
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null); // Track which text was copied
 
   const handleTranslate = async () => {
     if (!text.trim()) return;
@@ -72,6 +73,16 @@ export default function Home() {
 
   const clearInput = () => {
     setText('');
+  };
+
+  const copyToClipboard = async (text: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000); // Reset after 2 seconds
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
   };
 
   const startRecording = async () => {
@@ -450,20 +461,37 @@ export default function Home() {
                   className="w-8 h-8"
                 />
               </div>
-              <button
-                onClick={() => playAudio(translation, fromLang === 'en' ? 'es' : 'en', 'main-translation')}
-                disabled={playingAudio !== null}
-                className="p-3 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors disabled:opacity-50"
-                title="Play audio"
-              >
-                {playingAudio === 'main-translation' ? (
-                  <svg className="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                  </svg>
-                ) : (
-                  <img src="/sound.svg" alt="Play audio" className="w-6 h-6" />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => copyToClipboard(translation, 'main')}
+                  className="p-3 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors"
+                  title="Copy translation"
+                >
+                  {copiedId === 'main' ? (
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                </button>
+                <button
+                  onClick={() => playAudio(translation, fromLang === 'en' ? 'es' : 'en', 'main-translation')}
+                  disabled={playingAudio !== null}
+                  className="p-3 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors disabled:opacity-50"
+                  title="Play audio"
+                >
+                  {playingAudio === 'main-translation' ? (
+                    <svg className="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                    </svg>
+                  ) : (
+                    <img src="/sound.svg" alt="Play audio" className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Main Translation - Large font */}
@@ -531,7 +559,22 @@ export default function Home() {
 
             {showStreet && (
               <div className="mt-4 pt-4 border-t border-stone-300">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-end gap-2 mb-4">
+                  <button
+                    onClick={() => copyToClipboard(streetAlternative, 'street')}
+                    className="p-2 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors"
+                    title="Copy street translation"
+                  >
+                    {copiedId === 'street' ? (
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                  </button>
                   <button
                     onClick={() => playAudio(streetAlternative, fromLang === 'en' ? 'es' : 'en', 'street-main')}
                     disabled={playingAudio !== null}
