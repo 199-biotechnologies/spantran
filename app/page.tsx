@@ -1,18 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-
-interface Translation {
-  key?: string;
-  original: string;
-  translation: string;
-  examples?: string[];
-  fromLang: string;
-  toLang: string;
-  timestamp: number;
-  favorite?: boolean;
-}
 
 export default function Home() {
   const [text, setText] = useState('');
@@ -20,26 +9,10 @@ export default function Home() {
   const [examples, setExamples] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [fromLang, setFromLang] = useState<'en' | 'es'>('en');
-  const [history, setHistory] = useState<Translation[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-
-  useEffect(() => {
-    fetchHistory();
-  }, []);
-
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch('/api/history');
-      const data = await res.json();
-      setHistory(data.history || []);
-    } catch (error) {
-      console.error('Failed to fetch history:', error);
-    }
-  };
 
   const handleTranslate = async () => {
     if (!text.trim()) return;
@@ -60,18 +33,6 @@ export default function Home() {
       const data = await res.json();
       setTranslation(data.translation);
       setExamples(data.examples || []);
-
-      // Refresh history after successful translation
-      await fetchHistory();
-
-      // Set the current key (most recent translation)
-      const historyRes = await fetch('/api/history');
-      const historyData = await historyRes.json();
-      if (historyData.history && historyData.history.length > 0) {
-        // The most recent one should be our translation
-        const recentKeys = await fetch('/api/history').then(r => r.json());
-        // We'll need to find it by matching the translation
-      }
     } catch (error) {
       console.error('Translation error:', error);
       setTranslation('Translation failed. Please try again.');
@@ -81,36 +42,10 @@ export default function Home() {
     }
   };
 
-  const toggleFavorite = async (key: string, currentFavorite: boolean) => {
-    try {
-      await fetch('/api/favorite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key,
-          favorite: !currentFavorite,
-        }),
-      });
-
-      // Refresh history
-      fetchHistory();
-    } catch (error) {
-      console.error('Failed to toggle favorite:', error);
-    }
-  };
-
   const toggleLanguage = () => {
     setFromLang(fromLang === 'en' ? 'es' : 'en');
     setText('');
     setTranslation('');
-  };
-
-  const loadFromHistory = (item: Translation) => {
-    setText(item.original);
-    setTranslation(item.translation);
-    setExamples(item.examples || []);
-    setFromLang(item.fromLang as 'en' | 'es');
-    setShowHistory(false);
   };
 
   const startRecording = async () => {
@@ -319,16 +254,16 @@ export default function Home() {
         )}
 
         {/* Navigation Buttons */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <button
-            onClick={() => setShowHistory(!showHistory)}
+        <div className="grid grid-cols-2 gap-4">
+          <Link
+            href="/history"
             className="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="font-semibold text-stone-700">History ({history.length})</span>
-          </button>
+            <span className="font-semibold text-stone-700">History</span>
+          </Link>
 
           <Link
             href="/flashcards"
@@ -338,56 +273,6 @@ export default function Home() {
             <span className="font-semibold text-stone-700">Flashcards</span>
           </Link>
         </div>
-
-        {/* History List */}
-        {showHistory && (
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 space-y-2 max-h-96 overflow-y-auto">
-            {history.length === 0 ? (
-              <p className="text-stone-500 text-center py-8">No translations yet</p>
-            ) : (
-              history.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-xl border border-stone-200 hover:bg-stone-50 transition-colors"
-                >
-                  <div className="flex items-start gap-2">
-                    <button
-                      onClick={() => loadFromHistory(item)}
-                      className="flex-1 text-left min-w-0"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-lg">
-                          {item.fromLang === 'en' ? '🇺🇸→🇨🇴' : '🇨🇴→🇺🇸'}
-                        </span>
-                        <p className="text-xs text-stone-400">
-                          {new Date(item.timestamp).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <p className="text-sm text-stone-600 truncate">{item.original}</p>
-                      <p className="text-base text-stone-900 font-medium truncate">{item.translation}</p>
-                      {item.examples && item.examples.length > 0 && (
-                        <p className="text-xs text-stone-500 mt-1 truncate italic">
-                          {item.examples[0]}
-                        </p>
-                      )}
-                    </button>
-                    {item.key && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(item.key!, item.favorite || false);
-                        }}
-                        className="text-2xl hover:scale-110 transition-transform"
-                      >
-                        {item.favorite ? '⭐' : '☆'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

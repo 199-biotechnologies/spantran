@@ -89,21 +89,29 @@ export default function FlashcardsPage() {
 
   if (flashcards.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 p-6">
-        <div className="max-w-2xl mx-auto pt-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-stone-900 mb-4">📚 Flashcards</h1>
+      <div className="h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex flex-col overflow-hidden">
+        <div className="max-w-2xl mx-auto w-full flex flex-col h-full p-6">
+          {/* Fixed Header */}
+          <div className="flex-shrink-0 flex items-center justify-between mb-4">
+            <Link href="/" className="text-stone-600 hover:text-stone-900 text-2xl">
+              ←
+            </Link>
+            <h1 className="text-2xl font-bold text-stone-900">📚 Flashcards</h1>
+            <div className="w-8"></div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8 text-center">
-            <p className="text-xl text-stone-700 mb-6">No flashcards due for review!</p>
-            <p className="text-stone-600 mb-6">Star translations in your history to add them to your flashcard deck.</p>
-            <Link
-              href="/"
-              className="inline-block bg-stone-900 hover:bg-stone-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
-            >
-              ← Back to Translator
-            </Link>
+          {/* Content */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8 text-center max-w-md">
+              <p className="text-xl text-stone-700 mb-4">No flashcards due for review!</p>
+              <p className="text-stone-600 mb-6">Star translations in your history to add them to your flashcard deck.</p>
+              <Link
+                href="/"
+                className="inline-block bg-stone-900 hover:bg-stone-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+              >
+                Back to Translator
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -111,28 +119,31 @@ export default function FlashcardsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 p-6">
-      <div className="max-w-2xl mx-auto pt-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block text-stone-600 hover:text-stone-900 mb-4">
-            ← Back
+    <div className="h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex flex-col overflow-hidden">
+      <div className="max-w-2xl mx-auto w-full flex flex-col h-full p-6">
+        {/* Fixed Header */}
+        <div className="flex-shrink-0 flex items-center justify-between mb-4">
+          <Link href="/" className="text-stone-600 hover:text-stone-900 text-2xl">
+            ←
           </Link>
-          <h1 className="text-4xl font-bold text-stone-900 mb-2">📚 Flashcards</h1>
-          <p className="text-stone-600">
-            {currentIndex + 1} / {flashcards.length}
-          </p>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-stone-900">📚 Flashcards</h1>
+            <p className="text-sm text-stone-600">
+              {currentIndex + 1} / {flashcards.length}
+            </p>
+          </div>
+          <div className="w-8"></div> {/* Spacer for centering */}
         </div>
 
-        {/* Flashcard */}
+        {/* Flashcard - Fills remaining space */}
         {currentCard && (
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8 mb-4">
+          <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-stone-200 p-6 overflow-hidden">
             {/* Question Side */}
-            <div className="text-center mb-8">
-              <p className="text-sm text-stone-500 mb-2">
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <p className="text-sm text-stone-500 mb-3">
                 {currentCard.fromLang === 'en' ? 'English → Spanish' : 'Spanish → English'}
               </p>
-              <p className="text-4xl font-semibold text-stone-900">
+              <p className="text-3xl font-semibold text-stone-900 text-center px-4">
                 {currentCard.original}
               </p>
             </div>
@@ -141,7 +152,7 @@ export default function FlashcardsPage() {
             {!showAnswer && (
               <button
                 onClick={() => setShowAnswer(true)}
-                className="w-full bg-stone-900 hover:bg-stone-800 text-white font-semibold py-4 rounded-xl transition-colors"
+                className="flex-shrink-0 w-full bg-stone-900 hover:bg-stone-800 text-white font-semibold py-4 rounded-xl transition-colors"
               >
                 Show Answer
               </button>
@@ -149,19 +160,19 @@ export default function FlashcardsPage() {
 
             {/* Answer Side */}
             {showAnswer && (
-              <div className="space-y-6">
-                <div className="text-center py-6 border-t border-stone-200">
-                  <p className="text-3xl font-semibold text-stone-900 mb-4">
+              <div className="flex-shrink-0 space-y-4">
+                <div className="text-center py-4 border-t border-stone-200">
+                  <p className="text-2xl font-semibold text-stone-900 mb-3">
                     {currentCard.translation}
                   </p>
 
                   {/* Examples */}
                   {currentCard.examples && currentCard.examples.length > 0 && (
-                    <div className="mt-6">
+                    <div className="mt-3">
                       <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Examples:</p>
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         {currentCard.examples.map((example, idx) => (
-                          <p key={idx} className="text-sm text-stone-700 italic">
+                          <p key={idx} className="text-xs text-stone-700 italic">
                             {example}
                           </p>
                         ))}
@@ -175,7 +186,7 @@ export default function FlashcardsPage() {
                   <button
                     onClick={() => submitReview(0)}
                     disabled={reviewing}
-                    className="py-3 px-4 bg-red-100 hover:bg-red-200 text-red-800 font-semibold rounded-xl transition-colors disabled:opacity-50"
+                    className="py-3 px-2 bg-red-100 hover:bg-red-200 text-red-800 font-semibold rounded-xl transition-colors disabled:opacity-50"
                   >
                     <div className="text-xs">Again</div>
                     <div className="text-sm">1d</div>
@@ -183,7 +194,7 @@ export default function FlashcardsPage() {
                   <button
                     onClick={() => submitReview(3)}
                     disabled={reviewing}
-                    className="py-3 px-4 bg-orange-100 hover:bg-orange-200 text-orange-800 font-semibold rounded-xl transition-colors disabled:opacity-50"
+                    className="py-3 px-2 bg-orange-100 hover:bg-orange-200 text-orange-800 font-semibold rounded-xl transition-colors disabled:opacity-50"
                   >
                     <div className="text-xs">Hard</div>
                     <div className="text-sm">{Math.max(1, Math.round(currentCard.srs.interval * 1.2))}d</div>
@@ -191,7 +202,7 @@ export default function FlashcardsPage() {
                   <button
                     onClick={() => submitReview(4)}
                     disabled={reviewing}
-                    className="py-3 px-4 bg-green-100 hover:bg-green-200 text-green-800 font-semibold rounded-xl transition-colors disabled:opacity-50"
+                    className="py-3 px-2 bg-green-100 hover:bg-green-200 text-green-800 font-semibold rounded-xl transition-colors disabled:opacity-50"
                   >
                     <div className="text-xs">Good</div>
                     <div className="text-sm">{Math.max(1, Math.round(currentCard.srs.interval * currentCard.srs.easeFactor))}d</div>
@@ -199,14 +210,14 @@ export default function FlashcardsPage() {
                   <button
                     onClick={() => submitReview(5)}
                     disabled={reviewing}
-                    className="py-3 px-4 bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold rounded-xl transition-colors disabled:opacity-50"
+                    className="py-3 px-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold rounded-xl transition-colors disabled:opacity-50"
                   >
                     <div className="text-xs">Easy</div>
                     <div className="text-sm">{Math.max(1, Math.round(currentCard.srs.interval * currentCard.srs.easeFactor * 1.3))}d</div>
                   </button>
                 </div>
 
-                <p className="text-xs text-center text-stone-500 mt-2">
+                <p className="text-xs text-center text-stone-500">
                   How well did you remember this?
                 </p>
               </div>
