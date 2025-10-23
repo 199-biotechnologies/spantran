@@ -157,7 +157,7 @@ export default function FlashcardsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="min-h-screen p-6 flex items-center justify-center overscroll-none" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-900 mx-auto mb-4"></div>
           <p className="text-stone-600">Loading flashcards...</p>
@@ -168,7 +168,7 @@ export default function FlashcardsPage() {
 
   if (flashcards.length === 0) {
     return (
-      <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="h-screen flex flex-col overflow-hidden overscroll-none" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-2xl mx-auto w-full flex flex-col h-full p-6">
           {/* Fixed Header */}
           <div className="flex-shrink-0 flex items-center justify-between mb-4">
@@ -198,12 +198,12 @@ export default function FlashcardsPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="h-screen flex flex-col overflow-hidden overscroll-none" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="max-w-2xl mx-auto w-full flex flex-col h-full p-6">
         {/* Fixed Header */}
         <div className="flex-shrink-0 flex items-center justify-between mb-4">
-          <Link href="/" className="text-stone-600 hover:text-stone-900 text-2xl">
-            ←
+          <Link href="/" className="text-stone-600 hover:text-stone-900">
+            <img src="/go-back.svg" alt="Go back" className="w-6 h-6" />
           </Link>
           <div className="text-center">
             <h1 className="text-2xl font-bold text-stone-900">📚 Flashcards</h1>
