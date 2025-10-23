@@ -62,7 +62,30 @@ export default function Home() {
 
   const startRecording = async () => {
     try {
+      // AudioSession API workaround for iOS PWA standalone mode
+      // @ts-ignore - AudioSession API is not in TypeScript definitions yet
+      if (navigator.audioSession) {
+        try {
+          // @ts-ignore
+          navigator.audioSession.type = 'auto';
+        } catch (e) {
+          console.warn('AudioSession API failed:', e);
+        }
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // After permission granted, set play-and-record for proper routing (iOS PWA fix)
+      // @ts-ignore
+      if (navigator.audioSession) {
+        try {
+          // @ts-ignore
+          navigator.audioSession.type = 'play-and-record';
+          console.log('AudioSession set to play-and-record');
+        } catch (e) {
+          console.warn('AudioSession play-and-record failed:', e);
+        }
+      }
 
       // Detect iOS/Safari
       const isIOSSafari = /iPhone|iPad|iPod/.test(navigator.userAgent) &&
@@ -143,6 +166,20 @@ export default function Home() {
 
         // Stop all tracks
         stream.getTracks().forEach(track => track.stop());
+
+        // Reset AudioSession after recording (iOS PWA fix)
+        // @ts-ignore
+        if (navigator.audioSession) {
+          try {
+            // @ts-ignore
+            navigator.audioSession.type = 'playback';
+            // @ts-ignore
+            navigator.audioSession.type = 'auto';
+            console.log('AudioSession reset to auto');
+          } catch (e) {
+            console.warn('AudioSession reset failed:', e);
+          }
+        }
       };
 
       // iOS Safari only fires ondataavailable once when stop() is called
@@ -183,6 +220,18 @@ export default function Home() {
 
   const playAudio = async (textToSpeak: string, lang: string) => {
     setIsPlayingAudio(true);
+
+    // AudioSession API for iOS PWA standalone mode
+    // @ts-ignore
+    if (navigator.audioSession) {
+      try {
+        // @ts-ignore
+        navigator.audioSession.type = 'playback';
+        console.log('AudioSession set to playback');
+      } catch (e) {
+        console.warn('AudioSession playback failed:', e);
+      }
+    }
 
     // Create audio element immediately (synchronously) for iOS compatibility
     const audio = document.createElement('audio');

@@ -80,6 +80,18 @@ export default function FlashcardsPage() {
   const playAudio = async (text: string, lang: string, audioId: string) => {
     setPlayingAudio(audioId);
 
+    // AudioSession API for iOS PWA standalone mode
+    // @ts-ignore
+    if (navigator.audioSession) {
+      try {
+        // @ts-ignore
+        navigator.audioSession.type = 'playback';
+        console.log('AudioSession set to playback');
+      } catch (e) {
+        console.warn('AudioSession playback failed:', e);
+      }
+    }
+
     // Create audio element immediately (synchronously) for iOS compatibility
     const audio = document.createElement('audio');
     audio.controls = false;

@@ -108,6 +108,18 @@ export default function HistoryPage() {
   const playAudio = async (text: string, lang: string, audioId: string) => {
     setPlayingAudio(audioId);
 
+    // AudioSession API for iOS PWA standalone mode
+    // @ts-ignore
+    if (navigator.audioSession) {
+      try {
+        // @ts-ignore
+        navigator.audioSession.type = 'playback';
+        console.log('AudioSession set to playback');
+      } catch (e) {
+        console.warn('AudioSession playback failed:', e);
+      }
+    }
+
     // Create audio element immediately (synchronously) for iOS compatibility
     const audio = document.createElement('audio');
     audio.controls = false;
@@ -390,13 +402,25 @@ export default function HistoryPage() {
                   <p className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">Examples:</p>
                   <div className="space-y-4">
                     {selectedCard.examples.map((example, idx) => (
-                      <div key={idx} className="bg-stone-50 rounded-xl p-4 space-y-2">
-                        <p className="text-base text-stone-900 font-medium">
-                          {example.text}
-                        </p>
-                        <p className="text-sm text-stone-600 italic">
-                          {example.english}
-                        </p>
+                      <div key={idx} className="bg-stone-50 rounded-xl p-4">
+                        <div className="flex items-start gap-2">
+                          <button
+                            onClick={() => playAudio(example.text, selectedCard.toLang, `modal-example-${idx}`)}
+                            disabled={playingAudio === `modal-example-${idx}`}
+                            className="flex-shrink-0 p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50 mt-0.5"
+                            title="Play audio"
+                          >
+                            <img src="/sound.svg" alt="Play" className="w-4 h-4" />
+                          </button>
+                          <div className="flex-1 space-y-1">
+                            <p className="text-base text-stone-900 font-medium">
+                              {example.text}
+                            </p>
+                            <p className="text-sm text-stone-600 italic">
+                              {example.english}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
