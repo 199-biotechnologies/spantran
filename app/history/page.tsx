@@ -184,7 +184,7 @@ export default function HistoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#EABD56' }}>
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-900 mx-auto mb-4"></div>
           <p className="text-stone-600">Loading history...</p>
@@ -194,7 +194,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56' }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="max-w-4xl mx-auto w-full flex flex-col h-full p-6">
         {/* Fixed Header */}
         <div className="flex-shrink-0 flex items-center justify-between mb-4">

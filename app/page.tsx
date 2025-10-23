@@ -203,9 +203,9 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56' }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56', paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="flex-1 overflow-y-auto overscroll-none">
-        <div className="max-w-2xl mx-auto p-6 pt-8 pb-6">
+        <div className="max-w-2xl mx-auto p-6 pb-6">
         {/* Header */}
         <div className="text-center mb-8">
           <img src="/app-logo.svg" alt="Colombian Translator" className="h-16 mx-auto" />
@@ -340,20 +340,22 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/history"
-              className="bg-white rounded-xl border-2 border-black py-2.5 px-3 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              className="rounded-xl border-2 border-black py-2.5 px-3 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity text-white"
+              style={{ backgroundColor: '#177298' }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-medium text-stone-700 text-sm">History</span>
+              <span className="font-medium text-sm">History</span>
             </Link>
 
             <Link
               href="/flashcards"
-              className="bg-white rounded-xl border-2 border-black py-2.5 px-3 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              className="rounded-xl border-2 border-black py-2.5 px-3 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity text-white"
+              style={{ backgroundColor: '#177298' }}
             >
-              <img src="/flashcards.svg" alt="Flashcards" className="w-4 h-4" />
-              <span className="font-medium text-stone-700 text-sm">Flashcards</span>
+              <img src="/flashcards.svg" alt="Flashcards" className="w-4 h-4 brightness-0 invert" />
+              <span className="font-medium text-sm">Flashcards</span>
             </Link>
           </div>
         </div>
