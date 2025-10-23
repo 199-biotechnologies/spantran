@@ -335,8 +335,8 @@ export default function Home() {
       </div>
 
       {/* Fixed Navigation Buttons at Bottom */}
-      <div className="flex-shrink-0 border-t-2 border-black pb-safe" style={{ backgroundColor: '#EABD56' }}>
-        <div className="max-w-2xl mx-auto px-6 pt-3 pb-6">
+      <div className="flex-shrink-0 border-t-2 border-black" style={{ backgroundColor: '#EABD56', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}>
+        <div className="max-w-2xl mx-auto px-6 pt-3">
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/history"
