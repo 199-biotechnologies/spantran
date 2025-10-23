@@ -81,7 +81,7 @@ export default function FlashcardsPage() {
     // Create audio element immediately (synchronously) for iOS compatibility
     const audio = document.createElement('audio');
     audio.controls = false;
-    audio.playsInline = true; // Required for iOS
+    audio.setAttribute('playsinline', 'true'); // Required for iOS
     audio.preload = 'auto'; // Preload for better iOS compatibility
 
     // Add to DOM for iOS compatibility
