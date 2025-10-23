@@ -3,7 +3,7 @@
   "short_name": "CHIMBA",
   "description": "Colombian Spanish AI translator with street slang, flashcards, and audio playback",
   "start_url": "/",
-  "display": "minimal-ui",
+  "display": "browser",
   "background_color": "#EABD56",
   "theme_color": "#EABD56",
   "orientation": "portrait",
