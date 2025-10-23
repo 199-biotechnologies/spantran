@@ -467,15 +467,12 @@ export default function Home() {
                   className="p-3 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors"
                   title="Copy translation"
                 >
-                  {copiedId === 'main' ? (
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  )}
+                  <img
+                    src={copiedId === 'main' ? '/check.svg' : '/copy.svg'}
+                    alt={copiedId === 'main' ? 'Copied' : 'Copy'}
+                    className="w-6 h-6"
+                    style={copiedId === 'main' ? { filter: 'invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%)' } : {}}
+                  />
                 </button>
                 <button
                   onClick={() => playAudio(translation, fromLang === 'en' ? 'es' : 'en', 'main-translation')}
@@ -565,15 +562,12 @@ export default function Home() {
                     className="p-2 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors"
                     title="Copy street translation"
                   >
-                    {copiedId === 'street' ? (
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    )}
+                    <img
+                      src={copiedId === 'street' ? '/check.svg' : '/copy.svg'}
+                      alt={copiedId === 'street' ? 'Copied' : 'Copy'}
+                      className="w-5 h-5"
+                      style={copiedId === 'street' ? { filter: 'invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%)' } : {}}
+                    />
                   </button>
                   <button
                     onClick={() => playAudio(streetAlternative, fromLang === 'en' ? 'es' : 'en', 'street-main')}
