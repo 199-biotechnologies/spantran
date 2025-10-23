@@ -3,9 +3,9 @@
   "short_name": "ColTranslate",
   "description": "Colombian Spanish-English translator",
   "start_url": "/",
-  "display": "standalone",
-  "background_color": "#fafaf9",
-  "theme_color": "#fafaf9",
+  "display": "minimal-ui",
+  "background_color": "#EABD56",
+  "theme_color": "#EABD56",
   "orientation": "portrait",
   "icons": [
     {
