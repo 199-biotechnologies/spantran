@@ -1,4 +1,4 @@
-# Troubleshooting Guide for Colombian Translator
+# Troubleshooting Guide for CHIMBA Translate
 
 ## TTS/STT Not Working
 

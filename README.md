@@ -1,14 +1,17 @@
-# SpanTran 🇨🇴
+# CHIMBA Translate 🇨🇴
 
-Super simple Spanish/English translator optimized for mobile with Colombian Spanish focus.
+Colombian Spanish AI translator with street slang, flashcards, and audio playback.
 
 ## Features
 
-- Casual Colombian Spanish translation (informal, slang, innuendos)
-- Uses Claude Haiku 4.5 via OpenRouter for natural translations
-- Translation history stored in Vercel KV
-- Mobile-optimized PWA (add to iOS home screen)
-- Simple, clean UI
+- **Dual Translation**: Standard casual + street/vulgar Colombian slang alternatives
+- **Audio Playback**: Text-to-speech with ElevenLabs for all translations and examples
+- **Voice Recording**: Speech-to-text for hands-free translation
+- **Flashcards**: Spaced repetition system (SRS) for vocabulary learning
+- **Translation History**: Browse, search, and favorite past translations
+- **Colombian Focus**: Authentic Colombian Spanish with regional slang and expressions
+- **Mobile-optimized PWA**: Works offline, add to iOS home screen
+- **AI-Powered**: Uses Claude Haiku 4.5 via OpenRouter for natural translations
 
 ## Setup
 

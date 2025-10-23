@@ -9,13 +9,13 @@ const crimsonText = Crimson_Text({
 });
 
 export const metadata: Metadata = {
-  title: "Colombian Translator",
-  description: "Colombian Spanish-English translation app",
+  title: "CHIMBA Translate - Colombian Spanish AI Translator",
+  description: "Colombian Spanish AI translator with street slang, flashcards, and audio playback",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Colombian Translator",
+    title: "CHIMBA",
   },
   icons: {
     icon: '/favicon.png',
