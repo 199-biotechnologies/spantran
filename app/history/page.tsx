@@ -7,7 +7,7 @@ interface Translation {
   key?: string;
   original: string;
   translation: string;
-  examples?: string[];
+  examples?: Array<{ text: string; english: string }>;
   fromLang: string;
   toLang: string;
   timestamp: number;
@@ -20,6 +20,8 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchHistory();
@@ -99,6 +101,75 @@ export default function HistoryPage() {
     }
   };
 
+  const toggleExpanded = (key: string) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
+  const playAudio = async (text: string, lang: string, audioId: string) => {
+    setPlayingAudio(audioId);
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, language: lang }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Text-to-speech failed');
+      }
+
+      if (!data.audio) {
+        throw new Error('No audio data received from server');
+      }
+
+      // Convert base64 to audio and play
+      const audioData = atob(data.audio);
+      const arrayBuffer = new ArrayBuffer(audioData.length);
+      const view = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < audioData.length; i++) {
+        view[i] = audioData.charCodeAt(i);
+      }
+      const audioBlob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Use source element for better iOS Safari compatibility
+      const audio = document.createElement('audio');
+      const source = document.createElement('source');
+      source.src = audioUrl;
+      source.type = 'audio/mpeg';
+      audio.appendChild(source);
+
+      audio.onended = () => {
+        setPlayingAudio(null);
+        URL.revokeObjectURL(audioUrl);
+        audio.remove();
+      };
+
+      audio.onerror = () => {
+        setPlayingAudio(null);
+        URL.revokeObjectURL(audioUrl);
+        audio.remove();
+      };
+
+      audio.load();
+      await audio.play();
+    } catch (error: any) {
+      console.error('TTS error:', error);
+      alert('Text-to-speech failed: ' + error.message);
+      setPlayingAudio(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 p-6 flex items-center justify-center">
@@ -171,25 +242,57 @@ export default function HistoryPage() {
 
                     <div className="space-y-1">
                       <div>
-                        <p className="text-xs text-stone-500 uppercase tracking-wide mb-0.5">Original:</p>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <p className="text-xs text-stone-500 uppercase tracking-wide">Original:</p>
+                          <button
+                            onClick={() => playAudio(item.original, item.fromLang, `${item.key}-original`)}
+                            disabled={playingAudio === `${item.key}-original`}
+                            className="text-stone-600 hover:text-stone-900 disabled:opacity-50 transition-colors"
+                            title="Play audio"
+                          >
+                            {playingAudio === `${item.key}-original` ? '🔊' : '🔈'}
+                          </button>
+                        </div>
                         <p className="text-sm text-stone-700">{item.original}</p>
                       </div>
 
                       <div>
-                        <p className="text-xs text-stone-500 uppercase tracking-wide mb-0.5">Translation:</p>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <p className="text-xs text-stone-500 uppercase tracking-wide">Translation:</p>
+                          <button
+                            onClick={() => playAudio(item.translation, item.toLang, `${item.key}-translation`)}
+                            disabled={playingAudio === `${item.key}-translation`}
+                            className="text-stone-600 hover:text-stone-900 disabled:opacity-50 transition-colors"
+                            title="Play audio"
+                          >
+                            {playingAudio === `${item.key}-translation` ? '🔊' : '🔈'}
+                          </button>
+                        </div>
                         <p className="text-base text-stone-900 font-semibold">{item.translation}</p>
                       </div>
 
                       {item.examples && item.examples.length > 0 && (
                         <div>
-                          <p className="text-xs text-stone-500 uppercase tracking-wide mb-0.5">Examples:</p>
-                          <div className="space-y-0.5">
-                            {item.examples.map((example, idx) => (
-                              <p key={idx} className="text-xs text-stone-600 italic pl-2 border-l-2 border-stone-300">
-                                {example}
-                              </p>
-                            ))}
-                          </div>
+                          <button
+                            onClick={() => item.key && toggleExpanded(item.key)}
+                            className="text-xs text-stone-600 hover:text-stone-900 uppercase tracking-wide mb-1 flex items-center gap-1 transition-colors"
+                          >
+                            {expandedCards.has(item.key || '') ? '▼' : '▶'} Examples ({item.examples.length})
+                          </button>
+                          {expandedCards.has(item.key || '') && (
+                            <div className="space-y-2 mt-2">
+                              {item.examples.map((example, idx) => (
+                                <div key={idx} className="pl-2 border-l-2 border-stone-300 space-y-0.5">
+                                  <p className="text-xs text-stone-900 font-medium">
+                                    {example.text}
+                                  </p>
+                                  <p className="text-xs text-stone-500 italic">
+                                    {example.english}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

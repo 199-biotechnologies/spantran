@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function Home() {
   const [text, setText] = useState('');
   const [translation, setTranslation] = useState('');
-  const [examples, setExamples] = useState<string[]>([]);
+  const [examples, setExamples] = useState<Array<{ text: string; english: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [fromLang, setFromLang] = useState<'en' | 'es'>('en');
   const [currentKey, setCurrentKey] = useState<string | null>(null);
@@ -141,20 +141,29 @@ export default function Home() {
 
       const audioBlob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
+
+      // Use source element for better iOS Safari compatibility
+      const audio = document.createElement('audio');
+      const source = document.createElement('source');
+      source.src = audioUrl;
+      source.type = 'audio/mpeg';
+      audio.appendChild(source);
 
       audio.onended = () => {
         setIsPlayingAudio(false);
         URL.revokeObjectURL(audioUrl);
+        audio.remove();
       };
 
       audio.onerror = () => {
         setIsPlayingAudio(false);
         URL.revokeObjectURL(audioUrl);
+        audio.remove();
         alert('Failed to play audio');
       };
 
-      audio.play();
+      audio.load();
+      await audio.play();
     } catch (error: any) {
       console.error('Text-to-speech error:', error);
       alert('Text-to-speech failed: ' + (error.message || 'Unknown error'));
@@ -163,8 +172,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 p-6">
-      <div className="max-w-2xl mx-auto pt-8 pb-20">
+    <div className="h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto p-6 pt-8 pb-6">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-stone-900">
@@ -175,18 +185,18 @@ export default function Home() {
         {/* Language Toggle */}
         <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 mb-4">
           <div className="flex items-center justify-center gap-4 mb-6">
-            <span className="text-2xl font-semibold text-stone-700">
+            <span className="text-2xl font-semibold text-stone-700 w-24 text-right">
               {fromLang === 'en' ? '🇺🇸 EN' : '🇨🇴 ES'}
             </span>
             <button
               onClick={toggleLanguage}
-              className="bg-stone-900 hover:bg-stone-800 text-white p-3 rounded-full transition-colors"
+              className="bg-stone-900 hover:bg-stone-800 text-white p-3 rounded-full transition-colors flex-shrink-0"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
             </button>
-            <span className="text-2xl font-semibold text-stone-700">
+            <span className="text-2xl font-semibold text-stone-700 w-24 text-left">
               {fromLang === 'en' ? '🇨🇴 ES' : '🇺🇸 EN'}
             </span>
           </div>
@@ -268,11 +278,16 @@ export default function Home() {
             {examples && examples.length > 0 && (
               <div className="mt-6 pt-6 border-t border-stone-200">
                 <h4 className="text-sm font-semibold text-stone-600 mb-3 uppercase tracking-wide">Usage Examples:</h4>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {examples.map((example, idx) => (
-                    <p key={idx} className="text-sm text-stone-700 leading-relaxed pl-4 border-l-2 border-stone-300">
-                      {example}
-                    </p>
+                    <div key={idx} className="pl-4 border-l-2 border-stone-300 space-y-1">
+                      <p className="text-sm text-stone-900 leading-relaxed font-medium">
+                        {example.text}
+                      </p>
+                      <p className="text-xs text-stone-500 italic">
+                        {example.english}
+                      </p>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -280,25 +295,31 @@ export default function Home() {
           </div>
         )}
 
-        {/* Navigation Buttons */}
-        <div className="grid grid-cols-2 gap-4">
-          <Link
-            href="/history"
-            className="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="font-semibold text-stone-700">History</span>
-          </Link>
+        </div>
+      </div>
 
-          <Link
-            href="/flashcards"
-            className="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
-          >
-            <span className="text-xl">📚</span>
-            <span className="font-semibold text-stone-700">Flashcards</span>
-          </Link>
+      {/* Fixed Navigation Buttons at Bottom */}
+      <div className="flex-shrink-0 border-t border-stone-200 bg-white/80 backdrop-blur-sm">
+        <div className="max-w-2xl mx-auto p-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href="/history"
+              className="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-semibold text-stone-700">History</span>
+            </Link>
+
+            <Link
+              href="/flashcards"
+              className="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
+            >
+              <span className="text-xl">📚</span>
+              <span className="font-semibold text-stone-700">Flashcards</span>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

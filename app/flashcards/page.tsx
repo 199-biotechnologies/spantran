@@ -7,7 +7,7 @@ interface Flashcard {
   key: string;
   original: string;
   translation: string;
-  examples: string[];
+  examples: Array<{ text: string; english: string }>;
   fromLang: string;
   toLang: string;
   srs: {
@@ -25,6 +25,7 @@ export default function FlashcardsPage() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
   const [reviewing, setReviewing] = useState(false);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFlashcards();
@@ -71,6 +72,63 @@ export default function FlashcardsPage() {
       console.error('Failed to submit review:', error);
     } finally {
       setReviewing(false);
+    }
+  };
+
+  const playAudio = async (text: string, lang: string, audioId: string) => {
+    setPlayingAudio(audioId);
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, language: lang }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Text-to-speech failed');
+      }
+
+      if (!data.audio) {
+        throw new Error('No audio data received from server');
+      }
+
+      // Convert base64 to audio and play
+      const audioData = atob(data.audio);
+      const arrayBuffer = new ArrayBuffer(audioData.length);
+      const view = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < audioData.length; i++) {
+        view[i] = audioData.charCodeAt(i);
+      }
+      const audioBlob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Use source element for better iOS Safari compatibility
+      const audio = document.createElement('audio');
+      const source = document.createElement('source');
+      source.src = audioUrl;
+      source.type = 'audio/mpeg';
+      audio.appendChild(source);
+
+      audio.onended = () => {
+        setPlayingAudio(null);
+        URL.revokeObjectURL(audioUrl);
+        audio.remove();
+      };
+
+      audio.onerror = () => {
+        setPlayingAudio(null);
+        URL.revokeObjectURL(audioUrl);
+        audio.remove();
+      };
+
+      audio.load();
+      await audio.play();
+    } catch (error: any) {
+      console.error('TTS error:', error);
+      alert('Text-to-speech failed: ' + error.message);
+      setPlayingAudio(null);
     }
   };
 
@@ -143,9 +201,19 @@ export default function FlashcardsPage() {
               <p className="text-sm text-stone-500 mb-3">
                 {currentCard.fromLang === 'en' ? 'English → Spanish' : 'Spanish → English'}
               </p>
-              <p className="text-3xl font-semibold text-stone-900 text-center px-4">
-                {currentCard.original}
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-3xl font-semibold text-stone-900 text-center px-4">
+                  {currentCard.original}
+                </p>
+                <button
+                  onClick={() => playAudio(currentCard.original, currentCard.fromLang, 'question')}
+                  disabled={playingAudio === 'question'}
+                  className="text-2xl text-stone-600 hover:text-stone-900 disabled:opacity-50 transition-colors flex-shrink-0"
+                  title="Play audio"
+                >
+                  {playingAudio === 'question' ? '🔊' : '🔈'}
+                </button>
+              </div>
             </div>
 
             {/* Show Answer Button */}
@@ -162,19 +230,34 @@ export default function FlashcardsPage() {
             {showAnswer && (
               <div className="flex-shrink-0 space-y-4">
                 <div className="text-center py-4 border-t border-stone-200">
-                  <p className="text-2xl font-semibold text-stone-900 mb-3">
-                    {currentCard.translation}
-                  </p>
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <p className="text-2xl font-semibold text-stone-900">
+                      {currentCard.translation}
+                    </p>
+                    <button
+                      onClick={() => playAudio(currentCard.translation, currentCard.toLang, 'answer')}
+                      disabled={playingAudio === 'answer'}
+                      className="text-2xl text-stone-600 hover:text-stone-900 disabled:opacity-50 transition-colors flex-shrink-0"
+                      title="Play audio"
+                    >
+                      {playingAudio === 'answer' ? '🔊' : '🔈'}
+                    </button>
+                  </div>
 
                   {/* Examples */}
                   {currentCard.examples && currentCard.examples.length > 0 && (
                     <div className="mt-3">
                       <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Examples:</p>
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {currentCard.examples.map((example, idx) => (
-                          <p key={idx} className="text-xs text-stone-700 italic">
-                            {example}
-                          </p>
+                          <div key={idx} className="space-y-0.5">
+                            <p className="text-xs text-stone-900 font-medium">
+                              {example.text}
+                            </p>
+                            <p className="text-xs text-stone-500 italic">
+                              {example.english}
+                            </p>
+                          </div>
                         ))}
                       </div>
                     </div>

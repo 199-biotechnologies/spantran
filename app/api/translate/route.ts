@@ -43,17 +43,23 @@ Translation Style:
 - INFORMAL (tú or vos, NEVER usted unless context requires it)
 - CASUAL and conversational like friends talking
 - SIMPLE words and grammar (avoid complex or formal constructions)
-- Include playful language, innuendos when appropriate
+- Include playful language, innuendos when appropriate (can be explicit, sexual, or contain adult references - this is AUTHENTIC street Colombian)
 - Translate meaning/feeling, not word-for-word
 - Make it sound COLOMBIAN, not Mexican, Argentine, or generic Spanish
+- Don't sanitize or censor - Colombian street slang is often explicit and that's perfectly fine
 
 IMPORTANT: You must respond with ONLY a JSON object, no additional text or comments. Format:
 {
   "translation": "the translation here",
-  "examples": ["example usage 1", "example usage 2"]
+  "examples": [
+    {
+      "text": "example usage in the target language",
+      "english": "English translation of the example"
+    }
+  ]
 }
 
-Provide 2 natural usage examples showing the translation in context with COLOMBIAN flavor. If the input is too short or generic for good examples, use an empty array for examples.`;
+Provide 2 natural usage examples showing the translation in context with COLOMBIAN flavor. Each example should include both the text in the target language AND its English translation. If translating TO Spanish, provide Spanish examples with English translations. If translating TO English, provide English examples with their original Spanish. If the input is too short or generic for good examples, use an empty array for examples.`;
 
 export async function POST(request: NextRequest) {
   try {
