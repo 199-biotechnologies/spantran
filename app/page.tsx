@@ -203,9 +203,14 @@ export default function Home() {
         {/* Language Toggle */}
         <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 mb-4">
           <div className="flex items-center justify-center gap-4 mb-6">
-            <span className="text-2xl font-semibold text-stone-700 w-24 text-right">
-              {fromLang === 'en' ? '🇺🇸 EN' : '🇨🇴 ES'}
-            </span>
+            <div className="flex items-center gap-2 text-stone-700 w-32 justify-end">
+              <img
+                src={fromLang === 'en' ? '/english-flag.svg' : '/colombia-flag.svg'}
+                alt={fromLang === 'en' ? 'English' : 'Spanish'}
+                className="w-8 h-8"
+              />
+              <span className="text-2xl font-semibold">{fromLang === 'en' ? 'EN' : 'ES'}</span>
+            </div>
             <button
               onClick={toggleLanguage}
               className="bg-stone-900 hover:bg-stone-800 text-white p-3 rounded-full transition-colors flex-shrink-0"
@@ -214,9 +219,14 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
             </button>
-            <span className="text-2xl font-semibold text-stone-700 w-24 text-left">
-              {fromLang === 'en' ? '🇨🇴 ES' : '🇺🇸 EN'}
-            </span>
+            <div className="flex items-center gap-2 text-stone-700 w-32">
+              <img
+                src={fromLang === 'en' ? '/colombia-flag.svg' : '/english-flag.svg'}
+                alt={fromLang === 'en' ? 'Spanish' : 'English'}
+                className="w-8 h-8"
+              />
+              <span className="text-2xl font-semibold">{fromLang === 'en' ? 'ES' : 'EN'}</span>
+            </div>
           </div>
 
           {/* Input with Mic Button */}
@@ -269,9 +279,11 @@ export default function Home() {
           <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 mb-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <span className="text-2xl">
-                  {fromLang === 'en' ? '🇨🇴' : '🇺🇸'}
-                </span>
+                <img
+                  src={fromLang === 'en' ? '/colombia-flag.svg' : '/english-flag.svg'}
+                  alt={fromLang === 'en' ? 'Spanish' : 'English'}
+                  className="w-8 h-8"
+                />
               </div>
               <button
                 onClick={() => playAudio(translation, fromLang === 'en' ? 'es' : 'en')}
@@ -279,7 +291,7 @@ export default function Home() {
                 className="p-3 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors disabled:opacity-50"
                 title="Play audio"
               >
-                <img src="/volume.svg" alt="Play audio" className="w-6 h-6" />
+                <img src="/sound.svg" alt="Play audio" className="w-6 h-6" />
               </button>
             </div>
 

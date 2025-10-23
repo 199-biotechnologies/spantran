@@ -231,9 +231,19 @@ export default function HistoryPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-base">
-                        {item.fromLang === 'en' ? '🇺🇸→🇨🇴' : '🇨🇴→🇺🇸'}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <img
+                          src={item.fromLang === 'en' ? '/english-flag.svg' : '/colombia-flag.svg'}
+                          alt={item.fromLang === 'en' ? 'English' : 'Spanish'}
+                          className="w-5 h-5"
+                        />
+                        <span className="text-base">→</span>
+                        <img
+                          src={item.fromLang === 'en' ? '/colombia-flag.svg' : '/english-flag.svg'}
+                          alt={item.fromLang === 'en' ? 'Spanish' : 'English'}
+                          className="w-5 h-5"
+                        />
+                      </div>
                       <p className="text-xs text-stone-400">
                         {new Date(item.timestamp).toLocaleDateString()} {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
@@ -300,9 +310,19 @@ export default function HistoryPage() {
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-stone-200 p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-lg">
-                  {selectedCard.fromLang === 'en' ? '🇺🇸→🇨🇴' : '🇨🇴→🇺🇸'}
-                </span>
+                <div className="flex items-center gap-1">
+                  <img
+                    src={selectedCard.fromLang === 'en' ? '/english-flag.svg' : '/colombia-flag.svg'}
+                    alt={selectedCard.fromLang === 'en' ? 'English' : 'Spanish'}
+                    className="w-6 h-6"
+                  />
+                  <span className="text-lg">→</span>
+                  <img
+                    src={selectedCard.fromLang === 'en' ? '/colombia-flag.svg' : '/english-flag.svg'}
+                    alt={selectedCard.fromLang === 'en' ? 'Spanish' : 'English'}
+                    className="w-6 h-6"
+                  />
+                </div>
                 <p className="text-xs text-stone-500">
                   {new Date(selectedCard.timestamp).toLocaleDateString()} {new Date(selectedCard.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
@@ -329,7 +349,7 @@ export default function HistoryPage() {
                     className="p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50"
                     title="Play audio"
                   >
-                    <img src="/volume.svg" alt="Play" className="w-4 h-4" />
+                    <img src="/sound.svg" alt="Play" className="w-4 h-4" />
                   </button>
                 </div>
                 <p className="text-lg text-stone-800">{selectedCard.original}</p>
@@ -345,7 +365,7 @@ export default function HistoryPage() {
                     className="p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50"
                     title="Play audio"
                   >
-                    <img src="/volume.svg" alt="Play" className="w-4 h-4" />
+                    <img src="/sound.svg" alt="Play" className="w-4 h-4" />
                   </button>
                 </div>
                 <p className="text-xl text-stone-900 font-semibold">{selectedCard.translation}</p>
