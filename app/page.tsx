@@ -44,8 +44,9 @@ export default function Home() {
 
   const toggleLanguage = () => {
     setFromLang(fromLang === 'en' ? 'es' : 'en');
-    setText('');
+    // Keep the text, just clear the translation since direction changed
     setTranslation('');
+    setExamples([]);
   };
 
   const startRecording = async () => {
