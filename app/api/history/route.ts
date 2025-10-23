@@ -15,8 +15,8 @@ export async function GET() {
     // Fetch all translation data
     const translations = await Promise.all(
       historyKeys.map(async (key) => {
-        const data = await kv.get(String(key));
-        return data;
+        const data = await kv.get(String(key)) as any;
+        return data ? { ...data, key: String(key) } : null;
       })
     );
 

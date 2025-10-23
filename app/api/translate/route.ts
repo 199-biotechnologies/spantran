@@ -17,7 +17,15 @@ Key rules:
 - Include innuendos and playful language when appropriate
 - Sound like a real Colombian person chatting with a friend
 
-Translate naturally - don't be overly literal. Make it sound how a Colombian would actually say it.`;
+Translate naturally - don't be overly literal. Make it sound how a Colombian would actually say it.
+
+IMPORTANT: You must respond with ONLY a JSON object, no additional text or comments. Format:
+{
+  "translation": "the translation here",
+  "examples": ["example usage 1", "example usage 2"]
+}
+
+Provide 2 natural usage examples showing the translation in context. If the input is too short or generic for good examples, use an empty array for examples.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,9 +50,24 @@ export async function POST(request: NextRequest) {
         }
       ],
       temperature: 0.7,
+      response_format: { type: "json_object" }
     });
 
-    const translation = completion.choices[0]?.message?.content || '';
+    const responseContent = completion.choices[0]?.message?.content || '{}';
+    let parsedResponse;
+
+    try {
+      parsedResponse = JSON.parse(responseContent);
+    } catch (e) {
+      // Fallback if JSON parsing fails
+      parsedResponse = {
+        translation: responseContent,
+        examples: []
+      };
+    }
+
+    const translation = parsedResponse.translation || '';
+    const examples = parsedResponse.examples || [];
 
     // Store in KV with timestamp
     const timestamp = Date.now();
@@ -54,9 +77,11 @@ export async function POST(request: NextRequest) {
       await kv.set(historyKey, {
         original: text,
         translation,
+        examples,
         fromLang,
         toLang,
         timestamp,
+        favorite: false,
       }, {
         ex: 60 * 60 * 24 * 30, // 30 days expiry
       });
@@ -76,6 +101,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       translation,
+      examples,
       original: text,
       fromLang,
       toLang,

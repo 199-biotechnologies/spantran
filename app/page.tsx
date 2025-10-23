@@ -1,22 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface Translation {
+  key?: string;
   original: string;
   translation: string;
+  examples?: string[];
   fromLang: string;
   toLang: string;
   timestamp: number;
+  favorite?: boolean;
 }
 
 export default function Home() {
   const [text, setText] = useState('');
   const [translation, setTranslation] = useState('');
+  const [examples, setExamples] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [fromLang, setFromLang] = useState<'en' | 'es'>('en');
   const [history, setHistory] = useState<Translation[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [currentKey, setCurrentKey] = useState<string | null>(null);
 
   useEffect(() => {
     fetchHistory();
@@ -36,6 +42,7 @@ export default function Home() {
     if (!text.trim()) return;
 
     setLoading(true);
+    setCurrentKey(null); // Reset current key
     try {
       const res = await fetch('/api/translate', {
         method: 'POST',
@@ -49,14 +56,43 @@ export default function Home() {
 
       const data = await res.json();
       setTranslation(data.translation);
+      setExamples(data.examples || []);
 
       // Refresh history after successful translation
-      fetchHistory();
+      await fetchHistory();
+
+      // Set the current key (most recent translation)
+      const historyRes = await fetch('/api/history');
+      const historyData = await historyRes.json();
+      if (historyData.history && historyData.history.length > 0) {
+        // The most recent one should be our translation
+        const recentKeys = await fetch('/api/history').then(r => r.json());
+        // We'll need to find it by matching the translation
+      }
     } catch (error) {
       console.error('Translation error:', error);
       setTranslation('Translation failed. Please try again.');
+      setExamples([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleFavorite = async (key: string, currentFavorite: boolean) => {
+    try {
+      await fetch('/api/favorite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key,
+          favorite: !currentFavorite,
+        }),
+      });
+
+      // Refresh history
+      fetchHistory();
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
     }
   };
 
@@ -69,6 +105,7 @@ export default function Home() {
   const loadFromHistory = (item: Translation) => {
     setText(item.original);
     setTranslation(item.translation);
+    setExamples(item.examples || []);
     setFromLang(item.fromLang as 'en' | 'es');
     setShowHistory(false);
   };
@@ -78,12 +115,9 @@ export default function Home() {
       <div className="max-w-2xl mx-auto pt-8 pb-20">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-stone-900 mb-2">
+          <h1 className="text-4xl font-bold text-stone-900">
             🇨🇴 SpanTran
           </h1>
-          <p className="text-stone-600 text-base">
-            Casual Colombian Spanish translator
-          </p>
         </div>
 
         {/* Language Toggle */}
@@ -137,31 +171,53 @@ export default function Home() {
         {/* Translation Result */}
         {translation && (
           <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 mb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">
-                {fromLang === 'en' ? '🇨🇴' : '🇺🇸'}
-              </span>
-              <h3 className="font-semibold text-stone-700">Translation:</h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">
+                  {fromLang === 'en' ? '🇨🇴' : '🇺🇸'}
+                </span>
+              </div>
             </div>
-            <p className="text-base text-stone-900 leading-relaxed">{translation}</p>
+
+            {/* Main Translation - Large font */}
+            <p className="text-3xl font-semibold text-stone-900 leading-relaxed mb-6">{translation}</p>
+
+            {/* Usage Examples - Smaller font */}
+            {examples && examples.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-stone-200">
+                <h4 className="text-sm font-semibold text-stone-600 mb-3 uppercase tracking-wide">Usage Examples:</h4>
+                <div className="space-y-2">
+                  {examples.map((example, idx) => (
+                    <p key={idx} className="text-sm text-stone-700 leading-relaxed pl-4 border-l-2 border-stone-300">
+                      {example}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* History Toggle */}
-        <button
-          onClick={() => setShowHistory(!showHistory)}
-          className="w-full bg-white rounded-2xl shadow-sm border border-stone-200 p-4 mb-4 flex items-center justify-between hover:bg-stone-50 transition-colors"
-        >
-          <span className="font-semibold text-stone-700 flex items-center gap-2">
+        {/* Navigation Buttons */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            History ({history.length})
-          </span>
-          <svg className={`w-5 h-5 transition-transform ${showHistory ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+            <span className="font-semibold text-stone-700">History ({history.length})</span>
+          </button>
+
+          <Link
+            href="/flashcards"
+            className="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
+          >
+            <span className="text-xl">📚</span>
+            <span className="font-semibold text-stone-700">Flashcards</span>
+          </Link>
+        </div>
 
         {/* History List */}
         {showHistory && (
@@ -170,24 +226,44 @@ export default function Home() {
               <p className="text-stone-500 text-center py-8">No translations yet</p>
             ) : (
               history.map((item, idx) => (
-                <button
+                <div
                   key={idx}
-                  onClick={() => loadFromHistory(item)}
-                  className="w-full text-left p-3 rounded-xl hover:bg-stone-50 transition-colors border border-stone-200"
+                  className="p-3 rounded-xl border border-stone-200 hover:bg-stone-50 transition-colors"
                 >
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">
-                      {item.fromLang === 'en' ? '🇺🇸→🇨🇴' : '🇨🇴→🇺🇸'}
-                    </span>
-                    <div className="flex-1 min-w-0">
+                    <button
+                      onClick={() => loadFromHistory(item)}
+                      className="flex-1 text-left min-w-0"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">
+                          {item.fromLang === 'en' ? '🇺🇸→🇨🇴' : '🇨🇴→🇺🇸'}
+                        </span>
+                        <p className="text-xs text-stone-400">
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </p>
+                      </div>
                       <p className="text-sm text-stone-600 truncate">{item.original}</p>
-                      <p className="text-sm text-stone-900 font-medium truncate">{item.translation}</p>
-                      <p className="text-xs text-stone-400 mt-1">
-                        {new Date(item.timestamp).toLocaleDateString()}
-                      </p>
-                    </div>
+                      <p className="text-base text-stone-900 font-medium truncate">{item.translation}</p>
+                      {item.examples && item.examples.length > 0 && (
+                        <p className="text-xs text-stone-500 mt-1 truncate italic">
+                          {item.examples[0]}
+                        </p>
+                      )}
+                    </button>
+                    {item.key && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(item.key!, item.favorite || false);
+                        }}
+                        className="text-2xl hover:scale-110 transition-transform"
+                      >
+                        {item.favorite ? '⭐' : '☆'}
+                      </button>
+                    )}
                   </div>
-                </button>
+                </div>
               ))
             )}
           </div>
