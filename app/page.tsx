@@ -9,12 +9,13 @@ export default function Home() {
   const [examples, setExamples] = useState<Array<{ text: string; english: string }>>([]);
   const [streetAlternative, setStreetAlternative] = useState('');
   const [streetExamples, setStreetExamples] = useState<Array<{ text: string; english: string }>>([]);
-  const [showStreet, setShowStreet] = useState(false);
+  const [showStreet, setShowStreet] = useState(true); // Show street version by default
   const [loading, setLoading] = useState(false);
   const [fromLang, setFromLang] = useState<'en' | 'es'>('en');
   const [currentKey, setCurrentKey] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null); // Track which audio is playing
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
 
   const handleTranslate = async () => {
@@ -38,7 +39,7 @@ export default function Home() {
       setExamples(data.examples || []);
       setStreetAlternative(data.street_alternative || '');
       setStreetExamples(data.street_examples || []);
-      setShowStreet(false); // Reset to collapsed state
+      setShowStreet(true); // Show street version by default
     } catch (error) {
       console.error('Translation error:', error);
       setTranslation('Translation failed. Please try again.');
@@ -57,7 +58,20 @@ export default function Home() {
     setExamples([]);
     setStreetAlternative('');
     setStreetExamples([]);
-    setShowStreet(false);
+    setShowStreet(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Enter key without Shift = translate
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleTranslate();
+    }
+    // Shift+Enter = new line (default behavior)
+  };
+
+  const clearInput = () => {
+    setText('');
   };
 
   const startRecording = async () => {
@@ -194,6 +208,16 @@ export default function Home() {
 
       setMediaRecorder(recorder);
       setIsRecording(true);
+      setRecordingDuration(0);
+
+      // Start recording duration timer
+      const startTime = Date.now();
+      const timerInterval = setInterval(() => {
+        setRecordingDuration(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+
+      // Store interval ID on recorder for cleanup
+      (recorder as any).timerInterval = timerInterval;
     } catch (error) {
       console.error('Microphone access error:', error);
     }
@@ -201,6 +225,11 @@ export default function Home() {
 
   const stopRecording = () => {
     if (mediaRecorder && isRecording) {
+      // Clear recording timer
+      if ((mediaRecorder as any).timerInterval) {
+        clearInterval((mediaRecorder as any).timerInterval);
+      }
+
       // Force data collection before stopping (Option 3)
       try {
         mediaRecorder.requestData();
@@ -214,12 +243,13 @@ export default function Home() {
       }, 100);
 
       setIsRecording(false);
+      setRecordingDuration(0);
       setMediaRecorder(null);
     }
   };
 
-  const playAudio = async (textToSpeak: string, lang: string) => {
-    setIsPlayingAudio(true);
+  const playAudio = async (textToSpeak: string, lang: string, audioId: string) => {
+    setPlayingAudio(audioId);
 
     // AudioSession API for iOS PWA standalone mode
     // @ts-ignore
@@ -244,14 +274,14 @@ export default function Home() {
     document.body.appendChild(audio);
 
     audio.onended = () => {
-      setIsPlayingAudio(false);
+      setPlayingAudio(null);
       document.body.removeChild(audio);
     };
 
     audio.onerror = (e) => {
       console.error('Audio playback error:', e);
       console.error('Audio error details:', audio.error);
-      setIsPlayingAudio(false);
+      setPlayingAudio(null);
       if (document.body.contains(audio)) {
         document.body.removeChild(audio);
       }
@@ -301,7 +331,7 @@ export default function Home() {
       await audio.play();
     } catch (error: any) {
       console.error('Text-to-speech error:', error);
-      setIsPlayingAudio(false);
+      setPlayingAudio(null);
       if (document.body.contains(audio)) {
         document.body.removeChild(audio);
       }
@@ -346,15 +376,27 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Input with Mic Button */}
+          {/* Input with Clear and Mic Buttons */}
           <div className="relative">
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder={fromLang === 'en' ? 'Enter English text...' : 'Escribe en español...'}
-              className="w-full p-4 pr-16 border-2 border-stone-300 rounded-xl resize-none focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 text-2xl transition-all"
+              className="w-full p-4 pr-24 border-2 border-stone-300 rounded-xl resize-none focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 text-2xl transition-all"
               rows={3}
             />
+            {text && (
+              <button
+                onClick={clearInput}
+                className="absolute right-16 top-3 p-2 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-600 transition-colors"
+                title="Clear input"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
             <button
               onClick={isRecording ? stopRecording : startRecording}
               className={`absolute right-3 top-3 p-3 rounded-full transition-colors ${
@@ -369,6 +411,11 @@ export default function Home() {
                 <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
               </svg>
             </button>
+            {isRecording && (
+              <div className="absolute right-3 top-16 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                {Math.floor(recordingDuration / 60)}:{String(recordingDuration % 60).padStart(2, '0')}
+              </div>
+            )}
           </div>
 
           {/* Translate Button */}
@@ -404,12 +451,18 @@ export default function Home() {
                 />
               </div>
               <button
-                onClick={() => playAudio(translation, fromLang === 'en' ? 'es' : 'en')}
-                disabled={isPlayingAudio}
+                onClick={() => playAudio(translation, fromLang === 'en' ? 'es' : 'en', 'main-translation')}
+                disabled={playingAudio !== null}
                 className="p-3 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors disabled:opacity-50"
                 title="Play audio"
               >
-                <img src="/sound.svg" alt="Play audio" className="w-6 h-6" />
+                {playingAudio === 'main-translation' ? (
+                  <svg className="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                  </svg>
+                ) : (
+                  <img src="/sound.svg" alt="Play audio" className="w-6 h-6" />
+                )}
               </button>
             </div>
 
@@ -425,12 +478,18 @@ export default function Home() {
                     <div key={idx} className="pl-4 border-l-2 border-stone-300 space-y-1">
                       <div className="flex items-start gap-2">
                         <button
-                          onClick={() => playAudio(example.text, fromLang === 'en' ? 'es' : 'en')}
-                          disabled={isPlayingAudio}
+                          onClick={() => playAudio(example.text, fromLang === 'en' ? 'es' : 'en', `example-${idx}`)}
+                          disabled={playingAudio !== null}
                           className="flex-shrink-0 p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50 mt-0.5"
                           title="Play audio"
                         >
-                          <img src="/sound.svg" alt="Play" className="w-3 h-3" />
+                          {playingAudio === `example-${idx}` ? (
+                            <svg className="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                            </svg>
+                          ) : (
+                            <img src="/sound.svg" alt="Play" className="w-3 h-3" />
+                          )}
                         </button>
                         <div className="flex-1">
                           <p className="text-sm text-stone-900 leading-relaxed font-medium">
@@ -474,12 +533,18 @@ export default function Home() {
               <div className="mt-4 pt-4 border-t border-stone-300">
                 <div className="flex items-center justify-between mb-4">
                   <button
-                    onClick={() => playAudio(streetAlternative, fromLang === 'en' ? 'es' : 'en')}
-                    disabled={isPlayingAudio}
+                    onClick={() => playAudio(streetAlternative, fromLang === 'en' ? 'es' : 'en', 'street-main')}
+                    disabled={playingAudio !== null}
                     className="p-2 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors disabled:opacity-50"
                     title="Play audio"
                   >
-                    <img src="/sound.svg" alt="Play audio" className="w-5 h-5" />
+                    {playingAudio === 'street-main' ? (
+                      <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                      </svg>
+                    ) : (
+                      <img src="/sound.svg" alt="Play audio" className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
 
@@ -495,12 +560,18 @@ export default function Home() {
                         <div key={idx} className="pl-4 border-l-2 border-stone-400 space-y-1">
                           <div className="flex items-start gap-2">
                             <button
-                              onClick={() => playAudio(example.text, fromLang === 'en' ? 'es' : 'en')}
-                              disabled={isPlayingAudio}
+                              onClick={() => playAudio(example.text, fromLang === 'en' ? 'es' : 'en', `street-example-${idx}`)}
+                              disabled={playingAudio !== null}
                               className="flex-shrink-0 p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50 mt-0.5"
                               title="Play audio"
                             >
-                              <img src="/sound.svg" alt="Play" className="w-3 h-3" />
+                              {playingAudio === `street-example-${idx}` ? (
+                                <svg className="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                                </svg>
+                              ) : (
+                                <img src="/sound.svg" alt="Play" className="w-3 h-3" />
+                              )}
                             </button>
                             <div className="flex-1">
                               <p className="text-sm text-stone-900 leading-relaxed font-medium">
