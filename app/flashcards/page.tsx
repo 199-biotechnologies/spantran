@@ -172,8 +172,8 @@ export default function FlashcardsPage() {
         <div className="max-w-2xl mx-auto w-full flex flex-col h-full p-6">
           {/* Fixed Header */}
           <div className="flex-shrink-0 flex items-center justify-between mb-4">
-            <Link href="/" className="text-stone-600 hover:text-stone-900 text-2xl">
-              ←
+            <Link href="/" className="text-stone-600 hover:text-stone-900">
+              <img src="/go-back.svg" alt="Go back" className="w-6 h-6" />
             </Link>
             <h1 className="text-2xl font-bold text-stone-900">📚 Flashcards</h1>
             <div className="w-8"></div>
