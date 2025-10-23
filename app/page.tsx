@@ -281,13 +281,7 @@ export default function Home() {
                 className="p-3 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors disabled:opacity-50"
                 title="Play audio"
               >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  {isPlayingAudio ? (
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                  ) : (
-                    <path d="M8 5v14l11-7z"/>
-                  )}
-                </svg>
+                <img src="/volume.svg" alt="Play audio" className="w-6 h-6" />
               </button>
             </div>
 
@@ -319,25 +313,25 @@ export default function Home() {
       </div>
 
       {/* Fixed Navigation Buttons at Bottom */}
-      <div className="flex-shrink-0 border-t border-stone-200 bg-white/80 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto p-4">
+      <div className="flex-shrink-0 border-t border-stone-200 bg-white/80 backdrop-blur-sm pb-safe">
+        <div className="max-w-2xl mx-auto px-6 pt-3 pb-6">
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/history"
-              className="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
+              className="bg-white rounded-xl shadow-sm border border-stone-200 py-2.5 px-3 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-semibold text-stone-700">History</span>
+              <span className="font-medium text-stone-700 text-sm">History</span>
             </Link>
 
             <Link
               href="/flashcards"
-              className="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
+              className="bg-white rounded-xl shadow-sm border border-stone-200 py-2.5 px-3 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
             >
-              <span className="text-xl">📚</span>
-              <span className="font-semibold text-stone-700">Flashcards</span>
+              <img src="/flashcards.svg" alt="Flashcards" className="w-4 h-4" />
+              <span className="font-medium text-stone-700 text-sm">Flashcards</span>
             </Link>
           </div>
         </div>

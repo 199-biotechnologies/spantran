@@ -21,7 +21,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
-  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [selectedCard, setSelectedCard] = useState<Translation | null>(null);
 
   useEffect(() => {
     fetchHistory();
@@ -102,18 +102,6 @@ export default function HistoryPage() {
     } finally {
       setDeleting(null);
     }
-  };
-
-  const toggleExpanded = (key: string) => {
-    setExpandedCards(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(key)) {
-        newSet.delete(key);
-      } else {
-        newSet.add(key);
-      }
-      return newSet;
-    });
   };
 
   const playAudio = async (text: string, lang: string, audioId: string) => {
@@ -236,7 +224,8 @@ export default function HistoryPage() {
             filteredHistory.map((item) => (
               <div
                 key={item.key}
-                className="bg-white rounded-2xl shadow-sm border border-stone-200 p-3 hover:shadow-md transition-shadow"
+                onClick={() => setSelectedCard(item)}
+                className="bg-white rounded-2xl shadow-sm border border-stone-200 p-3 hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div className="flex items-start gap-2">
                   {/* Content */}
@@ -248,89 +237,44 @@ export default function HistoryPage() {
                       <p className="text-xs text-stone-400">
                         {new Date(item.timestamp).toLocaleDateString()} {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
+                      {item.examples && item.examples.length > 0 && (
+                        <span className="text-xs text-stone-500 ml-auto">
+                          {item.examples.length} examples
+                        </span>
+                      )}
                     </div>
 
                     <div className="space-y-1">
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <p className="text-xs text-stone-500 uppercase tracking-wide">Original:</p>
-                          <button
-                            onClick={() => playAudio(item.original, item.fromLang, `${item.key}-original`)}
-                            disabled={playingAudio === `${item.key}-original`}
-                            className="text-stone-600 hover:text-stone-900 disabled:opacity-50 transition-colors"
-                            title="Play audio"
-                          >
-                            {playingAudio === `${item.key}-original` ? '🔊' : '🔈'}
-                          </button>
-                        </div>
-                        <p className="text-sm text-stone-700">{item.original}</p>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <p className="text-xs text-stone-500 uppercase tracking-wide">Translation:</p>
-                          <button
-                            onClick={() => playAudio(item.translation, item.toLang, `${item.key}-translation`)}
-                            disabled={playingAudio === `${item.key}-translation`}
-                            className="text-stone-600 hover:text-stone-900 disabled:opacity-50 transition-colors"
-                            title="Play audio"
-                          >
-                            {playingAudio === `${item.key}-translation` ? '🔊' : '🔈'}
-                          </button>
-                        </div>
-                        <p className="text-base text-stone-900 font-semibold">{item.translation}</p>
-                      </div>
-
-                      {item.examples && item.examples.length > 0 && (
-                        <div>
-                          <button
-                            onClick={() => item.key && toggleExpanded(item.key)}
-                            className="text-xs text-stone-600 hover:text-stone-900 uppercase tracking-wide mb-1 flex items-center gap-1 transition-colors"
-                          >
-                            {expandedCards.has(item.key || '') ? '▼' : '▶'} Examples ({item.examples.length})
-                          </button>
-                          {expandedCards.has(item.key || '') && (
-                            <div className="space-y-2 mt-2">
-                              {item.examples.map((example, idx) => (
-                                <div key={idx} className="pl-2 border-l-2 border-stone-300 space-y-0.5">
-                                  <p className="text-xs text-stone-900 font-medium">
-                                    {example.text}
-                                  </p>
-                                  <p className="text-xs text-stone-500 italic">
-                                    {example.english}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <p className="text-sm text-stone-700">{item.original}</p>
+                      <p className="text-base text-stone-900 font-semibold">{item.translation}</p>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col gap-1 flex-shrink-0">
+                  <div className="flex flex-col gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                     {item.key && (
                       <>
                         <button
                           onClick={() => toggleFavorite(item.key!, item.favorite || false)}
-                          className="text-xl hover:scale-110 transition-transform"
+                          className="p-1 hover:bg-stone-100 rounded transition-colors"
                           title={item.favorite ? 'Remove from favorites' : 'Add to favorites'}
                         >
-                          {item.favorite ? '⭐' : '☆'}
+                          <img
+                            src={item.favorite ? "/star-full.svg" : "/star-empty.svg"}
+                            alt={item.favorite ? "Starred" : "Star"}
+                            className="w-5 h-5"
+                          />
                         </button>
                         <button
                           onClick={() => deleteItem(item.key!)}
                           disabled={deleting === item.key}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          className="p-1 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
                           title="Delete"
                         >
                           {deleting === item.key ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
                           ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            <img src="/remove.svg" alt="Delete" className="w-5 h-5" />
                           )}
                         </button>
                       </>
@@ -342,6 +286,93 @@ export default function HistoryPage() {
           )}
         </div>
       </div>
+
+      {/* Modal */}
+      {selectedCard && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedCard(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-stone-200 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">
+                  {selectedCard.fromLang === 'en' ? '🇺🇸→🇨🇴' : '🇨🇴→🇺🇸'}
+                </span>
+                <p className="text-xs text-stone-500">
+                  {new Date(selectedCard.timestamp).toLocaleDateString()} {new Date(selectedCard.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedCard(null)}
+                className="p-2 hover:bg-stone-100 rounded-full transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              {/* Original */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Original:</p>
+                  <button
+                    onClick={() => playAudio(selectedCard.original, selectedCard.fromLang, 'modal-original')}
+                    disabled={playingAudio === 'modal-original'}
+                    className="p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50"
+                    title="Play audio"
+                  >
+                    <img src="/volume.svg" alt="Play" className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-lg text-stone-800">{selectedCard.original}</p>
+              </div>
+
+              {/* Translation */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Translation:</p>
+                  <button
+                    onClick={() => playAudio(selectedCard.translation, selectedCard.toLang, 'modal-translation')}
+                    disabled={playingAudio === 'modal-translation'}
+                    className="p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50"
+                    title="Play audio"
+                  >
+                    <img src="/volume.svg" alt="Play" className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xl text-stone-900 font-semibold">{selectedCard.translation}</p>
+              </div>
+
+              {/* Examples */}
+              {selectedCard.examples && selectedCard.examples.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">Examples:</p>
+                  <div className="space-y-4">
+                    {selectedCard.examples.map((example, idx) => (
+                      <div key={idx} className="bg-stone-50 rounded-xl p-4 space-y-2">
+                        <p className="text-base text-stone-900 font-medium">
+                          {example.text}
+                        </p>
+                        <p className="text-sm text-stone-600 italic">
+                          {example.english}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
