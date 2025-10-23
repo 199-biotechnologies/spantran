@@ -37,7 +37,10 @@ export default function HistoryPage() {
         (item) =>
           item.original.toLowerCase().includes(query) ||
           item.translation.toLowerCase().includes(query) ||
-          (item.examples && item.examples.some(ex => ex.toLowerCase().includes(query)))
+          (item.examples && item.examples.some(ex =>
+            ex.text?.toLowerCase().includes(query) ||
+            ex.english?.toLowerCase().includes(query)
+          ))
       );
       setFilteredHistory(filtered);
     }
