@@ -30,8 +30,10 @@ export async function POST(request: NextRequest) {
     const elevenlabsFormData = new FormData();
     // Create a proper Blob with correct mime type
     const audioBlob = new Blob([buffer], { type: audioFile.type || 'audio/webm' });
-    elevenlabsFormData.append('audio', audioBlob, audioFile.name);
-    elevenlabsFormData.append('model_id', 'eleven_multilingual_v2');
+    // IMPORTANT: ElevenLabs expects 'file' parameter, not 'audio'
+    elevenlabsFormData.append('file', audioBlob, audioFile.name);
+    // IMPORTANT: Use 'scribe_v1' or 'scribe_v1_experimental', not eleven_multilingual_v2
+    elevenlabsFormData.append('model_id', 'scribe_v1');
 
     const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
       method: 'POST',
