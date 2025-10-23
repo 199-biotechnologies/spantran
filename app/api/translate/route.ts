@@ -50,16 +50,30 @@ export async function POST(request: NextRequest) {
         }
       ],
       temperature: 0.7,
-      response_format: { type: "json_object" }
     });
 
     const responseContent = completion.choices[0]?.message?.content || '{}';
+    console.log('Raw LLM response:', responseContent);
+
     let parsedResponse;
 
     try {
-      parsedResponse = JSON.parse(responseContent);
+      // Try to extract JSON if wrapped in markdown code blocks
+      let jsonContent = responseContent.trim();
+
+      // Remove markdown code blocks if present
+      if (jsonContent.startsWith('```json')) {
+        jsonContent = jsonContent.replace(/^```json\n/, '').replace(/\n```$/, '');
+      } else if (jsonContent.startsWith('```')) {
+        jsonContent = jsonContent.replace(/^```\n/, '').replace(/\n```$/, '');
+      }
+
+      parsedResponse = JSON.parse(jsonContent);
     } catch (e) {
-      // Fallback if JSON parsing fails
+      console.error('JSON parse error:', e);
+      console.error('Failed to parse:', responseContent);
+
+      // Fallback - treat entire response as translation
       parsedResponse = {
         translation: responseContent,
         examples: []

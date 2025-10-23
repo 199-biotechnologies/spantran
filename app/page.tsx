@@ -23,6 +23,9 @@ export default function Home() {
   const [history, setHistory] = useState<Translation[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
 
   useEffect(() => {
     fetchHistory();
@@ -110,6 +113,93 @@ export default function Home() {
     setShowHistory(false);
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const audioChunks: Blob[] = [];
+
+      recorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        formData.append('language', fromLang);
+
+        try {
+          const res = await fetch('/api/stt', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const data = await res.json();
+          setText(data.text);
+        } catch (error) {
+          console.error('Speech-to-text error:', error);
+        }
+
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Microphone access error:', error);
+      alert('Could not access microphone');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      setMediaRecorder(null);
+    }
+  };
+
+  const playAudio = async (textToSpeak: string, lang: string) => {
+    setIsPlayingAudio(true);
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: textToSpeak,
+          language: lang,
+        }),
+      });
+
+      const data = await res.json();
+
+      // Convert base64 to audio and play
+      const audioData = atob(data.audio);
+      const arrayBuffer = new ArrayBuffer(audioData.length);
+      const view = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < audioData.length; i++) {
+        view[i] = audioData.charCodeAt(i);
+      }
+
+      const audioBlob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        setIsPlayingAudio(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      audio.play();
+    } catch (error) {
+      console.error('Text-to-speech error:', error);
+      setIsPlayingAudio(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 p-6">
       <div className="max-w-2xl mx-auto pt-8 pb-20">
@@ -139,14 +229,30 @@ export default function Home() {
             </span>
           </div>
 
-          {/* Input */}
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={fromLang === 'en' ? 'Enter English text...' : 'Escribe en español...'}
-            className="w-full p-4 border-2 border-stone-300 rounded-xl resize-none focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 text-base transition-all"
-            rows={4}
-          />
+          {/* Input with Mic Button */}
+          <div className="relative">
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={fromLang === 'en' ? 'Enter English text...' : 'Escribe en español...'}
+              className="w-full p-4 pr-16 border-2 border-stone-300 rounded-xl resize-none focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 text-2xl transition-all"
+              rows={3}
+            />
+            <button
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`absolute right-3 top-3 p-3 rounded-full transition-colors ${
+                isRecording
+                  ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+                  : 'bg-stone-200 hover:bg-stone-300 text-stone-700'
+              }`}
+              title={isRecording ? 'Stop recording' : 'Start recording'}
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+              </svg>
+            </button>
+          </div>
 
           {/* Translate Button */}
           <button
@@ -177,10 +283,24 @@ export default function Home() {
                   {fromLang === 'en' ? '🇨🇴' : '🇺🇸'}
                 </span>
               </div>
+              <button
+                onClick={() => playAudio(translation, fromLang === 'en' ? 'es' : 'en')}
+                disabled={isPlayingAudio}
+                className="p-3 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors disabled:opacity-50"
+                title="Play audio"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  {isPlayingAudio ? (
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                  ) : (
+                    <path d="M8 5v14l11-7z"/>
+                  )}
+                </svg>
+              </button>
             </div>
 
             {/* Main Translation - Large font */}
-            <p className="text-3xl font-semibold text-stone-900 leading-relaxed mb-6">{translation}</p>
+            <p className="text-4xl font-semibold text-stone-900 leading-relaxed mb-6">{translation}</p>
 
             {/* Usage Examples - Smaller font */}
             {examples && examples.length > 0 && (
