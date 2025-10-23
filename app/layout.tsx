@@ -28,7 +28,8 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#fafaf9",
+  viewportFit: "cover", // Extends content into safe areas on iPhone
+  themeColor: "#EABD56", // Match yellow background
 };
 
 export default function RootLayout({

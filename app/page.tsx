@@ -128,17 +128,26 @@ export default function Home() {
     // Create audio element immediately (synchronously) for iOS compatibility
     const audio = document.createElement('audio');
     audio.controls = false;
+    audio.playsInline = true; // Required for iOS
+    audio.preload = 'auto'; // Preload for better iOS compatibility
+
+    // Add to DOM for iOS compatibility
+    audio.style.display = 'none';
+    document.body.appendChild(audio);
 
     audio.onended = () => {
       setIsPlayingAudio(false);
-      audio.remove();
+      document.body.removeChild(audio);
     };
 
     audio.onerror = (e) => {
       console.error('Audio playback error:', e);
+      console.error('Audio error details:', audio.error);
       setIsPlayingAudio(false);
-      audio.remove();
-      alert('Failed to play audio');
+      if (document.body.contains(audio)) {
+        document.body.removeChild(audio);
+      }
+      alert('Failed to play audio: ' + (audio.error?.message || 'Unknown error'));
     };
 
     try {
@@ -175,7 +184,7 @@ export default function Home() {
 
       // Set source and play
       audio.src = audioUrl;
-      audio.load();
+      await audio.load();
 
       // Cleanup URL after load
       audio.onloadeddata = () => {
@@ -187,7 +196,9 @@ export default function Home() {
       console.error('Text-to-speech error:', error);
       alert('Text-to-speech failed: ' + (error.message || 'Unknown error'));
       setIsPlayingAudio(false);
-      audio.remove();
+      if (document.body.contains(audio)) {
+        document.body.removeChild(audio);
+      }
     }
   };
 
