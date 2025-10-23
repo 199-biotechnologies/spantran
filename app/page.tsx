@@ -204,7 +204,7 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56' }}>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto overscroll-none">
         <div className="max-w-2xl mx-auto p-6 pt-8 pb-6">
         {/* Header */}
         <div className="text-center mb-8">

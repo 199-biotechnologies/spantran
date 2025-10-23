@@ -225,7 +225,7 @@ export default function HistoryPage() {
         </div>
 
         {/* History List - Scrollable */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+        <div className="flex-1 overflow-y-auto overscroll-none space-y-2 pr-2">
           {filteredHistory.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="bg-white rounded-2xl border-2 border-black p-8 text-center">
@@ -318,7 +318,7 @@ export default function HistoryPage() {
           onClick={() => setSelectedCard(null)}
         >
           <div
-            className="bg-white rounded-2xl border-4 border-black max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            className="bg-white rounded-2xl border-4 border-black max-w-2xl w-full max-h-[80vh] overflow-y-auto overscroll-none"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
