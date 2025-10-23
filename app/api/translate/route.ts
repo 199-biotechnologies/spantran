@@ -39,27 +39,30 @@ Colombian Characteristics:
 - Use "a la orden" (you're welcome, at your service)
 - Drop "s" at end of words sometimes: "entonce" instead of "entonces"
 
-Translation Style:
-- INFORMAL (tú or vos, NEVER usted unless context requires it)
-- CASUAL and conversational like friends talking
-- SIMPLE words and grammar (avoid complex or formal constructions)
-- Include playful language, innuendos when appropriate (can be explicit, sexual, or contain adult references - this is AUTHENTIC street Colombian)
-- Translate meaning/feeling, not word-for-word
-- Make it sound COLOMBIAN, not Mexican, Argentine, or generic Spanish
-- Don't sanitize or censor - Colombian street slang is often explicit and that's perfectly fine
+IMPORTANT: Provide TWO translations:
+
+1. STANDARD CASUAL: Friendly, casual Colombian Spanish (tú/vos) - what you'd say to anyone
+2. STREET/VULGAR: Ultra-casual, explicit slang with innuendos, dirty/sexy language, vulgar terms - authentic street Colombian that can be explicit, sexual, or contain adult references. This is for educational purposes to understand REAL Colombian street talk. Don't sanitize or censor - be authentic.
 
 IMPORTANT: You must respond with ONLY a JSON object, no additional text or comments. Format:
 {
-  "translation": "the translation here",
+  "translation": "standard casual translation",
+  "street_alternative": "ultra-casual/vulgar/slang alternative with explicit language if appropriate",
   "examples": [
     {
-      "text": "example usage in the target language",
+      "text": "example usage for standard translation",
+      "english": "English translation of the example"
+    }
+  ],
+  "street_examples": [
+    {
+      "text": "example usage for street/vulgar version",
       "english": "English translation of the example"
     }
   ]
 }
 
-Provide 2 natural usage examples showing the translation in context with COLOMBIAN flavor. Each example should include both the text in the target language AND its English translation. If translating TO Spanish, provide Spanish examples with English translations. If translating TO English, provide English examples with their original Spanish. If the input is too short or generic for good examples, use an empty array for examples.`;
+Provide 2 examples for each version showing authentic Colombian usage. Each example should include both the text in the target language AND its English translation. If translating TO Spanish, provide Spanish examples with English translations. If translating TO English, provide English examples with their original Spanish.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -115,7 +118,9 @@ export async function POST(request: NextRequest) {
     }
 
     const translation = parsedResponse.translation || '';
+    const street_alternative = parsedResponse.street_alternative || '';
     const examples = parsedResponse.examples || [];
+    const street_examples = parsedResponse.street_examples || [];
 
     // Store in KV with timestamp
     const timestamp = Date.now();
@@ -125,7 +130,9 @@ export async function POST(request: NextRequest) {
       await kv.set(historyKey, {
         original: text,
         translation,
+        street_alternative,
         examples,
+        street_examples,
         fromLang,
         toLang,
         timestamp,
@@ -149,7 +156,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       translation,
+      street_alternative,
       examples,
+      street_examples,
       original: text,
       fromLang,
       toLang,

@@ -7,6 +7,9 @@ export default function Home() {
   const [text, setText] = useState('');
   const [translation, setTranslation] = useState('');
   const [examples, setExamples] = useState<Array<{ text: string; english: string }>>([]);
+  const [streetAlternative, setStreetAlternative] = useState('');
+  const [streetExamples, setStreetExamples] = useState<Array<{ text: string; english: string }>>([]);
+  const [showStreet, setShowStreet] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fromLang, setFromLang] = useState<'en' | 'es'>('en');
   const [currentKey, setCurrentKey] = useState<string | null>(null);
@@ -33,10 +36,15 @@ export default function Home() {
       const data = await res.json();
       setTranslation(data.translation);
       setExamples(data.examples || []);
+      setStreetAlternative(data.street_alternative || '');
+      setStreetExamples(data.street_examples || []);
+      setShowStreet(false); // Reset to collapsed state
     } catch (error) {
       console.error('Translation error:', error);
       setTranslation('Translation failed. Please try again.');
       setExamples([]);
+      setStreetAlternative('');
+      setStreetExamples([]);
     } finally {
       setLoading(false);
     }
@@ -47,11 +55,19 @@ export default function Home() {
     // Keep the text, just clear the translation since direction changed
     setTranslation('');
     setExamples([]);
+    setStreetAlternative('');
+    setStreetExamples([]);
+    setShowStreet(false);
   };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Detect iOS/Safari
+      const isIOSSafari = /iPhone|iPad|iPod/.test(navigator.userAgent) &&
+                          /Safari/.test(navigator.userAgent) &&
+                          !/Chrome|CriOS|FxiOS/.test(navigator.userAgent);
 
       // Detect supported MIME type (iOS uses audio/mp4, desktop uses audio/webm)
       let mimeType = 'audio/webm';
@@ -84,7 +100,7 @@ export default function Home() {
 
         // Check if we have any valid chunks
         if (audioChunks.length === 0) {
-          alert('No audio recorded. Please try again.');
+          console.error('No audio chunks recorded');
           stream.getTracks().forEach(track => track.stop());
           return;
         }
@@ -94,7 +110,7 @@ export default function Home() {
 
         // Validate blob size before upload
         if (audioBlob.size === 0) {
-          alert('Recording failed: empty audio file. Please try again.');
+          console.error('Recording failed: empty audio file');
           stream.getTracks().forEach(track => track.stop());
           return;
         }
@@ -123,26 +139,43 @@ export default function Home() {
           }
         } catch (error: any) {
           console.error('Speech-to-text error:', error);
-          alert('Speech-to-text failed: ' + (error.message || 'Unknown error'));
         }
 
         // Stop all tracks
         stream.getTracks().forEach(track => track.stop());
       };
 
-      // Start with timeslice for better iOS compatibility
-      recorder.start(1000); // Request data every 1 second
+      // iOS Safari only fires ondataavailable once when stop() is called
+      // Desktop browsers support timeslice
+      if (isIOSSafari) {
+        console.log('iOS Safari detected - recording without timeslice');
+        recorder.start(); // No timeslice for iOS
+      } else {
+        console.log('Desktop browser detected - recording with timeslice');
+        recorder.start(1000); // Request data every 1 second
+      }
+
       setMediaRecorder(recorder);
       setIsRecording(true);
     } catch (error) {
       console.error('Microphone access error:', error);
-      alert('Could not access microphone');
     }
   };
 
   const stopRecording = () => {
     if (mediaRecorder && isRecording) {
-      mediaRecorder.stop();
+      // Force data collection before stopping (Option 3)
+      try {
+        mediaRecorder.requestData();
+      } catch (error) {
+        console.warn('requestData() failed:', error);
+      }
+
+      // Small delay to ensure data is collected
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 100);
+
       setIsRecording(false);
       setMediaRecorder(null);
     }
@@ -173,7 +206,6 @@ export default function Home() {
       if (document.body.contains(audio)) {
         document.body.removeChild(audio);
       }
-      alert('Failed to play audio: ' + (audio.error?.message || 'Unknown error'));
     };
 
     try {
@@ -220,7 +252,6 @@ export default function Home() {
       await audio.play();
     } catch (error: any) {
       console.error('Text-to-speech error:', error);
-      alert('Text-to-speech failed: ' + (error.message || 'Unknown error'));
       setIsPlayingAudio(false);
       if (document.body.contains(audio)) {
         document.body.removeChild(audio);
@@ -364,6 +395,78 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Street/Vulgar Alternative - Collapsible */}
+        {streetAlternative && (
+          <div className="bg-stone-50 rounded-2xl border-2 border-black p-6 mb-4">
+            <button
+              onClick={() => setShowStreet(!showStreet)}
+              className="w-full flex items-center justify-between text-left"
+            >
+              <div>
+                <h4 className="text-sm font-bold text-stone-900 uppercase tracking-wide">Street Colombian</h4>
+                <p className="text-xs text-stone-600">Ultra-casual slang / Explicit language</p>
+              </div>
+              <svg
+                className={`w-6 h-6 text-stone-600 transition-transform ${showStreet ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {showStreet && (
+              <div className="mt-4 pt-4 border-t border-stone-300">
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    onClick={() => playAudio(streetAlternative, fromLang === 'en' ? 'es' : 'en')}
+                    disabled={isPlayingAudio}
+                    className="p-2 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 transition-colors disabled:opacity-50"
+                    title="Play audio"
+                  >
+                    <img src="/sound.svg" alt="Play audio" className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Street Translation */}
+                <p className="text-3xl font-semibold text-stone-900 leading-relaxed mb-6">{streetAlternative}</p>
+
+                {/* Street Examples */}
+                {streetExamples && streetExamples.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-stone-300">
+                    <h4 className="text-sm font-semibold text-stone-600 mb-3 uppercase tracking-wide">Street Examples:</h4>
+                    <div className="space-y-3">
+                      {streetExamples.map((example, idx) => (
+                        <div key={idx} className="pl-4 border-l-2 border-stone-400 space-y-1">
+                          <div className="flex items-start gap-2">
+                            <button
+                              onClick={() => playAudio(example.text, fromLang === 'en' ? 'es' : 'en')}
+                              disabled={isPlayingAudio}
+                              className="flex-shrink-0 p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50 mt-0.5"
+                              title="Play audio"
+                            >
+                              <img src="/sound.svg" alt="Play" className="w-3 h-3" />
+                            </button>
+                            <div className="flex-1">
+                              <p className="text-sm text-stone-900 leading-relaxed font-medium">
+                                {example.text}
+                              </p>
+                              <p className="text-xs text-stone-500 italic">
+                                {example.english}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

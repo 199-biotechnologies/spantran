@@ -8,6 +8,8 @@ interface Translation {
   original: string;
   translation: string;
   examples?: Array<{ text: string; english: string }>;
+  street_alternative?: string;
+  street_examples?: Array<{ text: string; english: string }>;
   fromLang: string;
   toLang: string;
   timestamp: number;
@@ -94,11 +96,10 @@ export default function HistoryPage() {
         // Remove from local state
         setHistory(history.filter(item => item.key !== key));
       } else {
-        alert('Failed to delete item');
+        console.error('Failed to delete item');
       }
     } catch (error) {
       console.error('Delete error:', error);
-      alert('Failed to delete item');
     } finally {
       setDeleting(null);
     }
@@ -131,7 +132,6 @@ export default function HistoryPage() {
       if (document.body.contains(audio)) {
         document.body.removeChild(audio);
       }
-      alert('Failed to play audio: ' + (audio.error?.message || 'Unknown error'));
     };
 
     try {
@@ -174,7 +174,6 @@ export default function HistoryPage() {
       await audio.play();
     } catch (error: any) {
       console.error('TTS error:', error);
-      alert('Text-to-speech failed: ' + error.message);
       setPlayingAudio(null);
       if (document.body.contains(audio)) {
         document.body.removeChild(audio);
@@ -401,6 +400,43 @@ export default function HistoryPage() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Street Alternative */}
+              {selectedCard.street_alternative && (
+                <div className="mt-6 pt-6 border-t-2 border-stone-300">
+                  <p className="text-sm font-bold text-stone-900 uppercase tracking-wide mb-3">Street Colombian</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <button
+                      onClick={() => playAudio(selectedCard.street_alternative!, selectedCard.toLang, 'modal-street')}
+                      disabled={playingAudio === 'modal-street'}
+                      className="p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50"
+                      title="Play audio"
+                    >
+                      <img src="/sound.svg" alt="Play" className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-lg text-stone-900 font-semibold mb-4">{selectedCard.street_alternative}</p>
+
+                  {/* Street Examples */}
+                  {selectedCard.street_examples && selectedCard.street_examples.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Street Examples:</p>
+                      <div className="space-y-3">
+                        {selectedCard.street_examples.map((example, idx) => (
+                          <div key={idx} className="bg-stone-100 rounded-xl p-3 space-y-1">
+                            <p className="text-sm text-stone-900 font-medium">
+                              {example.text}
+                            </p>
+                            <p className="text-xs text-stone-600 italic">
+                              {example.english}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

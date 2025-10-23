@@ -8,6 +8,8 @@ interface Flashcard {
   original: string;
   translation: string;
   examples: Array<{ text: string; english: string }>;
+  street_alternative?: string;
+  street_examples?: Array<{ text: string; english: string }>;
   fromLang: string;
   toLang: string;
   srs: {
@@ -102,7 +104,6 @@ export default function FlashcardsPage() {
       if (document.body.contains(audio)) {
         document.body.removeChild(audio);
       }
-      alert('Failed to play audio: ' + (audio.error?.message || 'Unknown error'));
     };
 
     try {
@@ -145,7 +146,6 @@ export default function FlashcardsPage() {
       await audio.play();
     } catch (error: any) {
       console.error('TTS error:', error);
-      alert('Text-to-speech failed: ' + error.message);
       setPlayingAudio(null);
       if (document.body.contains(audio)) {
         document.body.removeChild(audio);
