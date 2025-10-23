@@ -170,7 +170,7 @@ export default function HistoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 p-6 flex items-center justify-center">
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#EABD56' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-900 mx-auto mb-4"></div>
           <p className="text-stone-600">Loading history...</p>
@@ -180,7 +180,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56' }}>
       <div className="max-w-4xl mx-auto w-full flex flex-col h-full p-6">
         {/* Fixed Header */}
         <div className="flex-shrink-0 flex items-center justify-between mb-4">
@@ -195,7 +195,7 @@ export default function HistoryPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="flex-shrink-0 bg-white rounded-2xl shadow-sm border border-stone-200 p-3 mb-3">
+        <div className="flex-shrink-0 bg-white rounded-2xl border-2 border-black p-3 mb-3">
           <div className="relative">
             <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -214,7 +214,7 @@ export default function HistoryPage() {
         <div className="flex-1 overflow-y-auto space-y-2 pr-2">
           {filteredHistory.length === 0 ? (
             <div className="flex items-center justify-center h-full">
-              <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8 text-center">
+              <div className="bg-white rounded-2xl border-2 border-black p-8 text-center">
                 <p className="text-stone-500">
                   {searchQuery ? 'No translations found' : 'No translations yet'}
                 </p>
@@ -225,7 +225,7 @@ export default function HistoryPage() {
               <div
                 key={item.key}
                 onClick={() => setSelectedCard(item)}
-                className="bg-white rounded-2xl shadow-sm border border-stone-200 p-3 hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white rounded-2xl border-2 border-black p-3 hover:opacity-90 transition-opacity cursor-pointer"
               >
                 <div className="flex items-start gap-2">
                   {/* Content */}
@@ -304,7 +304,7 @@ export default function HistoryPage() {
           onClick={() => setSelectedCard(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            className="bg-white rounded-2xl border-4 border-black max-w-2xl w-full max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}

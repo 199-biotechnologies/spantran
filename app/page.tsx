@@ -192,7 +192,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56' }}>
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto p-6 pt-8 pb-6">
         {/* Header */}
@@ -201,7 +201,7 @@ export default function Home() {
         </div>
 
         {/* Language Toggle */}
-        <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 mb-4">
+        <div className="bg-white rounded-2xl border-2 border-black p-6 mb-4">
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="flex items-center gap-2 text-stone-700 w-32 justify-end">
               <img
@@ -258,7 +258,8 @@ export default function Home() {
           <button
             onClick={handleTranslate}
             disabled={loading || !text.trim()}
-            className="w-full mt-4 bg-stone-900 hover:bg-stone-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="w-full mt-4 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-2 border-black"
+            style={{ backgroundColor: '#177298' }}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -276,7 +277,7 @@ export default function Home() {
 
         {/* Translation Result */}
         {translation && (
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 mb-4">
+          <div className="bg-white rounded-2xl border-2 border-black p-6 mb-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <img
@@ -323,12 +324,12 @@ export default function Home() {
       </div>
 
       {/* Fixed Navigation Buttons at Bottom */}
-      <div className="flex-shrink-0 border-t border-stone-200 bg-white/80 backdrop-blur-sm pb-safe">
+      <div className="flex-shrink-0 border-t-2 border-black pb-safe" style={{ backgroundColor: '#EABD56' }}>
         <div className="max-w-2xl mx-auto px-6 pt-3 pb-6">
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/history"
-              className="bg-white rounded-xl shadow-sm border border-stone-200 py-2.5 px-3 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
+              className="bg-white rounded-xl border-2 border-black py-2.5 px-3 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -338,7 +339,7 @@ export default function Home() {
 
             <Link
               href="/flashcards"
-              className="bg-white rounded-xl shadow-sm border border-stone-200 py-2.5 px-3 flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors"
+              className="bg-white rounded-xl border-2 border-black py-2.5 px-3 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
             >
               <img src="/flashcards.svg" alt="Flashcards" className="w-4 h-4" />
               <span className="font-medium text-stone-700 text-sm">Flashcards</span>

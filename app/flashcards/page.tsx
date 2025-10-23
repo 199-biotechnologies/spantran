@@ -143,7 +143,7 @@ export default function FlashcardsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 p-6 flex items-center justify-center">
+      <div className="min-h-screen p-6 flex items-center justify-center" style={{ backgroundColor: '#EABD56' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-900 mx-auto mb-4"></div>
           <p className="text-stone-600">Loading flashcards...</p>
@@ -154,7 +154,7 @@ export default function FlashcardsPage() {
 
   if (flashcards.length === 0) {
     return (
-      <div className="h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex flex-col overflow-hidden">
+      <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56' }}>
         <div className="max-w-2xl mx-auto w-full flex flex-col h-full p-6">
           {/* Fixed Header */}
           <div className="flex-shrink-0 flex items-center justify-between mb-4">
@@ -167,7 +167,7 @@ export default function FlashcardsPage() {
 
           {/* Content */}
           <div className="flex-1 flex items-center justify-center">
-            <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8 text-center max-w-md">
+            <div className="bg-white rounded-2xl border-2 border-black p-8 text-center max-w-md">
               <p className="text-xl text-stone-700 mb-4">No flashcards due for review!</p>
               <p className="text-stone-600 mb-6">Star translations in your history to add them to your flashcard deck.</p>
               <Link
@@ -184,7 +184,7 @@ export default function FlashcardsPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#EABD56' }}>
       <div className="max-w-2xl mx-auto w-full flex flex-col h-full p-6">
         {/* Fixed Header */}
         <div className="flex-shrink-0 flex items-center justify-between mb-4">
@@ -202,7 +202,7 @@ export default function FlashcardsPage() {
 
         {/* Flashcard - Fills remaining space */}
         {currentCard && (
-          <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-stone-200 p-6 overflow-hidden">
+          <div className="flex-1 flex flex-col bg-white rounded-2xl border-2 border-black p-6 overflow-hidden">
             {/* Question Side */}
             <div className="flex-1 flex flex-col items-center justify-center">
               <p className="text-sm text-stone-500 mb-3">
