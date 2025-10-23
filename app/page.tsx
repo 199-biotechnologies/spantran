@@ -69,11 +69,35 @@ export default function Home() {
       const audioChunks: Blob[] = [];
 
       recorder.ondataavailable = (event) => {
-        audioChunks.push(event.data);
+        // Filter out empty blobs - Safari bug fix
+        if (event.data && event.data.size > 0) {
+          console.log('Received audio chunk:', event.data.size, 'bytes');
+          audioChunks.push(event.data);
+        } else {
+          console.warn('Skipped empty audio chunk');
+        }
       };
 
       recorder.onstop = async () => {
+        console.log('Recording stopped, total chunks:', audioChunks.length);
+
+        // Check if we have any valid chunks
+        if (audioChunks.length === 0) {
+          alert('No audio recorded. Please try again.');
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
         const audioBlob = new Blob(audioChunks, { type: mimeType });
+        console.log('Final audio blob:', audioBlob.size, 'bytes, type:', audioBlob.type);
+
+        // Validate blob size before upload
+        if (audioBlob.size === 0) {
+          alert('Recording failed: empty audio file. Please try again.');
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
         const formData = new FormData();
         formData.append('audio', audioBlob, `recording.${fileExtension}`);
         formData.append('language', fromLang);
@@ -105,7 +129,8 @@ export default function Home() {
         stream.getTracks().forEach(track => track.stop());
       };
 
-      recorder.start();
+      // Start with timeslice for better iOS compatibility
+      recorder.start(1000); // Request data every 1 second
       setMediaRecorder(recorder);
       setIsRecording(true);
     } catch (error) {
@@ -317,12 +342,24 @@ export default function Home() {
                 <div className="space-y-3">
                   {examples.map((example, idx) => (
                     <div key={idx} className="pl-4 border-l-2 border-stone-300 space-y-1">
-                      <p className="text-sm text-stone-900 leading-relaxed font-medium">
-                        {example.text}
-                      </p>
-                      <p className="text-xs text-stone-500 italic">
-                        {example.english}
-                      </p>
+                      <div className="flex items-start gap-2">
+                        <button
+                          onClick={() => playAudio(example.text, fromLang === 'en' ? 'es' : 'en')}
+                          disabled={isPlayingAudio}
+                          className="flex-shrink-0 p-1 hover:bg-stone-100 rounded transition-colors disabled:opacity-50 mt-0.5"
+                          title="Play audio"
+                        >
+                          <img src="/sound.svg" alt="Play" className="w-3 h-3" />
+                        </button>
+                        <div className="flex-1">
+                          <p className="text-sm text-stone-900 leading-relaxed font-medium">
+                            {example.text}
+                          </p>
+                          <p className="text-xs text-stone-500 italic">
+                            {example.english}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
