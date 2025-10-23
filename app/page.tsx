@@ -51,7 +51,21 @@ export default function Home() {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+
+      // Detect supported MIME type (iOS uses audio/mp4, desktop uses audio/webm)
+      let mimeType = 'audio/webm';
+      let fileExtension = 'webm';
+
+      if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+        fileExtension = 'mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+      }
+
+      const recorder = new MediaRecorder(stream, { mimeType });
       const audioChunks: Blob[] = [];
 
       recorder.ondataavailable = (event) => {
@@ -59,9 +73,9 @@ export default function Home() {
       };
 
       recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunks, { type: mimeType });
         const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.webm');
+        formData.append('audio', audioBlob, `recording.${fileExtension}`);
         formData.append('language', fromLang);
 
         try {
@@ -110,6 +124,23 @@ export default function Home() {
 
   const playAudio = async (textToSpeak: string, lang: string) => {
     setIsPlayingAudio(true);
+
+    // Create audio element immediately (synchronously) for iOS compatibility
+    const audio = document.createElement('audio');
+    audio.controls = false;
+
+    audio.onended = () => {
+      setIsPlayingAudio(false);
+      audio.remove();
+    };
+
+    audio.onerror = (e) => {
+      console.error('Audio playback error:', e);
+      setIsPlayingAudio(false);
+      audio.remove();
+      alert('Failed to play audio');
+    };
+
     try {
       const res = await fetch('/api/tts', {
         method: 'POST',
@@ -131,7 +162,7 @@ export default function Home() {
         throw new Error('No audio data received from server');
       }
 
-      // Convert base64 to audio and play
+      // Convert base64 to audio data
       const audioData = atob(data.audio);
       const arrayBuffer = new ArrayBuffer(audioData.length);
       const view = new Uint8Array(arrayBuffer);
@@ -142,32 +173,21 @@ export default function Home() {
       const audioBlob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
 
-      // Use source element for better iOS Safari compatibility
-      const audio = document.createElement('audio');
-      const source = document.createElement('source');
-      source.src = audioUrl;
-      source.type = 'audio/mpeg';
-      audio.appendChild(source);
-
-      audio.onended = () => {
-        setIsPlayingAudio(false);
-        URL.revokeObjectURL(audioUrl);
-        audio.remove();
-      };
-
-      audio.onerror = () => {
-        setIsPlayingAudio(false);
-        URL.revokeObjectURL(audioUrl);
-        audio.remove();
-        alert('Failed to play audio');
-      };
-
+      // Set source and play
+      audio.src = audioUrl;
       audio.load();
+
+      // Cleanup URL after load
+      audio.onloadeddata = () => {
+        URL.revokeObjectURL(audioUrl);
+      };
+
       await audio.play();
     } catch (error: any) {
       console.error('Text-to-speech error:', error);
       alert('Text-to-speech failed: ' + (error.message || 'Unknown error'));
       setIsPlayingAudio(false);
+      audio.remove();
     }
   };
 
