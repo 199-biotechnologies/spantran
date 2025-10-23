@@ -9,13 +9,13 @@ const crimsonText = Crimson_Text({
 });
 
 export const metadata: Metadata = {
-  title: "SpanTran - Colombian Spanish Translator",
-  description: "Easy casual Colombian Spanish translation",
+  title: "Colombian Translator",
+  description: "Colombian Spanish-English translation app",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "SpanTran",
+    title: "Colombian Translator",
   },
   icons: {
     icon: '/favicon.png',

@@ -1,7 +1,7 @@
 {
-  "name": "SpanTran",
-  "short_name": "SpanTran",
-  "description": "Casual Colombian Spanish translator",
+  "name": "Colombian Translator",
+  "short_name": "ColTranslate",
+  "description": "Colombian Spanish-English translator",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fafaf9",

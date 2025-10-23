@@ -1,39 +1,29 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background gradient -->
-  <rect width="512" height="512" rx="115" fill="url(#gradient)"/>
-
-  <!-- Colombian flag colors as accent -->
-  <rect x="40" y="40" width="432" height="20" rx="10" fill="#FCD116"/>
-  <rect x="40" y="65" width="432" height="10" rx="5" fill="#003893"/>
-  <rect x="40" y="80" width="432" height="10" rx="5" fill="#CE1126"/>
-
-  <!-- Translation arrows -->
-  <g transform="translate(256, 256)">
-    <!-- Large circular background -->
-    <circle cx="0" cy="0" r="140" fill="rgba(255,255,255,0.95)"/>
-
-    <!-- Left arrow (EN to ES) -->
-    <g transform="translate(-60, -30)">
-      <path d="M 0 0 L 40 0 L 40 -15 L 70 15 L 40 45 L 40 30 L 0 30 Z" fill="#1c1917" opacity="0.9"/>
-    </g>
-
-    <!-- Right arrow (ES to EN) -->
-    <g transform="translate(60, 30) rotate(180)">
-      <path d="M 0 0 L 40 0 L 40 -15 L 70 15 L 40 45 L 40 30 L 0 30 Z" fill="#1c1917" opacity="0.9"/>
-    </g>
-
-    <!-- ES text -->
-    <text x="-50" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="700" fill="#1c1917">ES</text>
-
-    <!-- EN text -->
-    <text x="10" y="-40" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="700" fill="#1c1917">EN</text>
-  </g>
-
-  <!-- Gradient definition -->
+  <!-- Background with Colombian colors gradient -->
   <defs>
-    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#fafaf9;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#e7e5e4;stop-opacity:1" />
+    <linearGradient id="colombianGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FCD116;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#003893;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#003893;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#CE1126;stop-opacity:1" />
     </linearGradient>
   </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="115" fill="url(#colombianGrad)"/>
+
+  <!-- Translation symbol - Two overlapping speech bubbles -->
+  <!-- Left bubble (English) -->
+  <path d="M150 180 C150 150, 170 130, 200 130 L250 130 C280 130, 300 150, 300 180 L300 240 C300 270, 280 290, 250 290 L180 290 L150 320 L150 290 C150 290, 150 270, 150 240 Z"
+        fill="white" opacity="0.95"/>
+  <text x="225" y="225" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#003893" text-anchor="middle">EN</text>
+
+  <!-- Right bubble (Spanish) -->
+  <path d="M212 222 C212 192, 232 172, 262 172 L330 172 C360 172, 380 192, 380 222 L380 302 C380 332, 360 352, 330 352 L260 352 L230 382 L230 352 C230 352, 212 332, 212 302 Z"
+        fill="white" opacity="0.95"/>
+  <text x="295" y="277" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#CE1126" text-anchor="middle">ES</text>
+
+  <!-- Connecting arrows showing translation -->
+  <path d="M285 200 L305 215 L285 230" stroke="white" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.9"/>
+  <path d="M235 270 L215 285 L235 300" stroke="white" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.9"/>
 </svg>

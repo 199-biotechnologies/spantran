@@ -140,8 +140,8 @@ export default function Home() {
       <div className="max-w-2xl mx-auto pt-8 pb-20">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-stone-900">
-            🇨🇴 SpanTran
+          <h1 className="text-2xl font-bold text-stone-900">
+            Colombian Translator
           </h1>
         </div>
 
