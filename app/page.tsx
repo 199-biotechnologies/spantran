@@ -197,9 +197,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto p-6 pt-8 pb-6">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-stone-900">
-            Colombian Translator
-          </h1>
+          <img src="/app-logo.svg" alt="Colombian Translator" className="h-12 mx-auto" />
         </div>
 
         {/* Language Toggle */}
