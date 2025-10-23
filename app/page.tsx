@@ -71,9 +71,20 @@ export default function Home() {
           });
 
           const data = await res.json();
-          setText(data.text);
-        } catch (error) {
+
+          // Check for errors in response
+          if (!res.ok || data.error) {
+            throw new Error(data.error || 'Speech-to-text failed');
+          }
+
+          if (data.text) {
+            setText(data.text);
+          } else {
+            throw new Error('No text received from speech-to-text');
+          }
+        } catch (error: any) {
           console.error('Speech-to-text error:', error);
+          alert('Speech-to-text failed: ' + (error.message || 'Unknown error'));
         }
 
         // Stop all tracks
@@ -111,6 +122,15 @@ export default function Home() {
 
       const data = await res.json();
 
+      // Check for errors in response
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Text-to-speech failed');
+      }
+
+      if (!data.audio) {
+        throw new Error('No audio data received from server');
+      }
+
       // Convert base64 to audio and play
       const audioData = atob(data.audio);
       const arrayBuffer = new ArrayBuffer(audioData.length);
@@ -128,9 +148,16 @@ export default function Home() {
         URL.revokeObjectURL(audioUrl);
       };
 
+      audio.onerror = () => {
+        setIsPlayingAudio(false);
+        URL.revokeObjectURL(audioUrl);
+        alert('Failed to play audio');
+      };
+
       audio.play();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Text-to-speech error:', error);
+      alert('Text-to-speech failed: ' + (error.message || 'Unknown error'));
       setIsPlayingAudio(false);
     }
   };
